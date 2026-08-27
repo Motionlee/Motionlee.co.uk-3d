@@ -1,0 +1,238 @@
+@import "./theme.css";
+
+/* ------------------------------------------------------------------
+   Promise rail — Framer's sideways gallery.
+
+   The track bleeds off the right edge of the viewport rather than ending at
+   the container gutter. That overhang is the whole trick: a row that stops
+   neatly inside the margin reads as a grid that got cut off, while one that
+   runs past the edge reads as a set you can move through.
+   ------------------------------------------------------------------ */
+
+.ml-rail-wrap {
+  margin-top: clamp(64px, 10vh, 116px);
+}
+
+.ml-rail-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-28);
+  flex-wrap: wrap;
+}
+
+.ml-rail-title {
+  margin-top: 20px;
+  max-width: 22ch;
+  font-family: var(--font-head);
+  font-weight: 500;
+  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--white);
+}
+.ml-rail-title span {
+  display: block;
+  color: #a78bfa;
+}
+
+/* --- controls -------------------------------------------------------- */
+.ml-rail-nav {
+  display: flex;
+  gap: 10px;
+  flex: none;
+}
+.ml-rail-nav button {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--white);
+  font-size: 15px;
+  cursor: pointer;
+  transition:
+    background var(--dur-micro) var(--ease-ui),
+    border-color var(--dur-micro) var(--ease-ui),
+    opacity var(--dur-micro) var(--ease-ui);
+}
+.ml-rail-nav button:hover:not(:disabled) {
+  background: rgba(124, 92, 255, 0.18);
+  border-color: rgba(186, 166, 255, 0.5);
+}
+/* Dimmed rather than hidden — a control that vanishes at the end of the
+   track makes the row appear to jump as the buttons reflow. */
+.ml-rail-nav button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* --- the track ------------------------------------------------------- */
+.ml-rail {
+  margin-top: clamp(28px, 4vh, 44px);
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  /* Break all the way out to the viewport's right edge so the next card is
+     always visibly cut, which is what tells you the row continues.
+     Cancelling only the gutter was not enough — .ml-prop-inner is a centred
+     max-width container, so the track still stopped at the auto margin and
+     the row read as a grid that ended early. The max() keeps the offset at
+     zero once the viewport is narrower than the container. */
+  --rail-bleed: calc(max(0px, (100vw - 1180px) / 2) + clamp(24px, 5vw, 60px));
+  margin-right: calc(var(--rail-bleed) * -1);
+  padding-right: var(--rail-bleed);
+  padding-bottom: 6px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.ml-rail::-webkit-scrollbar { display: none; }
+.ml-rail:focus-visible {
+  outline: 2px solid rgba(167, 139, 250, 0.8);
+  outline-offset: 6px;
+  border-radius: 18px;
+}
+
+.ml-rail-card {
+  flex: 0 0 clamp(280px, 30vw, 420px);
+  scroll-snap-align: start;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(24, 21, 46, 0.55), rgba(7, 6, 14, 0.85));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 0 1px rgba(150, 132, 220, 0.18),
+    0 24px 60px -30px rgba(0, 0, 0, 0.95);
+  transition: box-shadow 0.5s var(--ease-ui);
+}
+
+/* Entrance. More specific than the page's shared [data-reveal] rule so it can
+   travel further and add a little scale — a 14px nudge reads as nothing on a
+   card this size. The whole transition is restated because replacing it
+   piecemeal would drop the hover's box-shadow easing. */
+.ml-rail-card[data-reveal] {
+  --in: 0;
+  opacity: var(--in);
+  transform:
+    translate3d(0, calc((1 - var(--in)) * 26px), 0)
+    scale(calc(0.965 + var(--in) * 0.035));
+  transition:
+    opacity 0.8s var(--ease-ui) var(--d, 0ms),
+    transform 0.8s var(--ease-ui) var(--d, 0ms),
+    box-shadow 0.5s var(--ease-ui);
+}
+
+/* Hover belongs to pointer devices. A phone fires :hover on tap and then
+   leaves the card lit until you tap somewhere else, which reads as a stuck
+   state rather than a response — the scroll-driven version below replaces it
+   on touch. */
+@media (hover: hover) and (pointer: fine) {
+  .ml-rail-card:hover {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 0 1px rgba(186, 166, 255, 0.45),
+      0 0 30px -6px rgba(140, 110, 255, 0.36),
+      0 24px 60px -30px rgba(0, 0, 0, 0.95);
+  }
+}
+
+/* Touch: the card the rail has settled on lights up, the rest sit back.
+   data-active is written per scroll frame by PromiseRail. */
+@media (hover: none) {
+  .ml-rail-card {
+    transition:
+      opacity 0.8s var(--ease-ui) var(--d, 0ms),
+      transform 0.8s var(--ease-ui) var(--d, 0ms),
+      box-shadow 0.55s var(--ease-ui),
+      filter 0.55s var(--ease-ui);
+    /* Dimmed rather than faded: opacity is already carrying the reveal, and
+       stacking two opacities would make a card that has not been reached yet
+       disappear entirely. */
+    filter: brightness(0.5) saturate(0.85);
+  }
+  .ml-rail-card[data-active] {
+    filter: none;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 0 0 1px rgba(186, 166, 255, 0.5),
+      0 0 34px -6px rgba(140, 110, 255, 0.42),
+      0 24px 60px -30px rgba(0, 0, 0, 0.95);
+  }
+}
+
+/* --- the photograph -------------------------------------------------- */
+.ml-rail-shot {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: #07060e;
+}
+.ml-rail-shot img {
+  object-fit: cover;
+  transform: scale(1.02);
+  transition: transform 0.9s var(--ease-ui);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ml-rail-card:hover .ml-rail-shot img { transform: scale(1.07); }
+}
+@media (hover: none) {
+  .ml-rail-card[data-active] .ml-rail-shot img { transform: scale(1.06); }
+}
+
+/* The photographs are warmer than the rest of the page, so a violet wash
+   and a foot gradient pull them back into the palette and stop the card
+   reading as a stock photo dropped onto a dark site. */
+.ml-rail-shot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    /* Top scrim for the index. Card 01 opens on a bright shop window and the
+       white numeral vanished into it — a text-shadow alone cannot carry a
+       light glyph over an unpredictable photograph. */
+    linear-gradient(to bottom, rgba(7, 6, 14, 0.72) 0%, rgba(0, 0, 0, 0) 22%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0) 52%, rgba(7, 6, 14, 0.92) 100%),
+    linear-gradient(200deg, rgba(90, 55, 200, 0.24), rgba(0, 0, 0, 0) 62%);
+}
+
+.ml-rail-no {
+  position: absolute;
+  left: 18px;
+  top: 16px;
+  z-index: 2;
+  font-family: var(--font-head);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #d6c8ff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+}
+
+/* --- copy ------------------------------------------------------------ */
+.ml-rail-body { padding: clamp(20px, 2.2vw, 26px); }
+.ml-rail-card-title {
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--white);
+}
+.ml-rail-card-text {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--fog);
+}
+
+@media (max-width: 620px) {
+  .ml-rail-card { flex-basis: 86vw; }
+  .ml-rail-nav { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ml-rail { scroll-behavior: auto; }
+  .ml-rail-shot img { transition: none; transform: none; }
+}

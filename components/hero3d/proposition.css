@@ -1,0 +1,466 @@
+@import "./theme.css";
+
+/* ------------------------------------------------------------------
+   Proposition — the sales argument, directly under the hero.
+   Ghost panels, serif prose, one violet pill. Nothing raised, nothing
+   glowing: the system's depth comes from hairlines and translucency.
+   ------------------------------------------------------------------ */
+
+.ml-prop {
+  position: relative;
+  /* Above the hero: this panel wiping across it *is* the transition. Opaque,
+     so the two compositions are never visible through one another — a
+     crossfade between two full compositions always reads as a double
+     exposure no matter how the timing is tuned. */
+  z-index: 3;
+  background: var(--void);
+  padding: clamp(80px, 12vh, 150px) 0 clamp(90px, 14vh, 170px);
+
+  /* Pulled up so its top lands about two thirds through the hero's travel.
+     That is what lets the wipe start while the sculpture is still panning
+     out, instead of after it — no black frame between the two. */
+  margin-top: -153vh;
+  /* --hold parks the section vertically for the length of the wipe, so it
+     comes in flat rather than drifting diagonally. That leaves it offset
+     downward by the hold distance for good, which this reclaims. */
+  margin-bottom: 44vh;
+
+  /* --enter 0 parks the whole section one screen to the left; 1 seats it.
+     Defaults to seated so it is readable with no JS. */
+  transform: translate3d(calc((var(--enter, 1) - 1) * 100%), var(--hold, 0px), 0);
+  will-change: transform;
+}
+
+/* Light spilling off the leading edge while it travels, gone once seated.
+   Without it a black panel slides over a near-black hero and the movement is
+   almost invisible. Sits at the top screen, which is the only part visible
+   during the wipe. */
+.ml-prop::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  /* Flush, not -1px. Bleeding it a pixel past the edge pushed the document's
+     scrollWidth to 1441 — invisible behind overflow-x:hidden, but it is the
+     kind of thing that turns into a scrollbar the moment that clip moves. */
+  right: 0;
+  width: 340px;
+  height: 100vh;
+  z-index: 4;
+  pointer-events: none;
+  /* One edge, not two.
+     This carried `box-shadow: 8px 0 46px` to strengthen the glow — but a
+     box-shadow outlines the whole 340px box, so it lit the band's *left*
+     boundary as well and the wipe showed two vertical lines travelling
+     together. The glow is gradient-only now, so the single lit edge is the
+     panel's own.
+     Every stop also stays in the same hue and fades to alpha 0 on that hue.
+     Ending on transparent black interpolates through grey in sRGB, which
+     greys the falloff and gives the band a visible boundary of its own. */
+  background: linear-gradient(
+    to left,
+    rgba(224, 212, 255, 0.9) 0px,
+    rgba(186, 160, 255, 0.5) 2px,
+    rgba(158, 126, 255, 0.26) 12%,
+    rgba(140, 110, 255, 0.12) 34%,
+    rgba(132, 100, 255, 0.04) 62%,
+    rgba(124, 92, 255, 0) 100%
+  );
+  /* Peaks mid-travel and is gone once seated, so the seam never sits lit on
+     a stationary panel. */
+  opacity: calc((1 - var(--enter, 1)) * 1.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ml-prop {
+    margin-top: 0;
+    margin-bottom: 0;
+    transform: none;
+  }
+  .ml-prop::before { display: none; }
+}
+
+.ml-prop-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-inline: clamp(24px, 5vw, 60px);
+}
+
+/* Opacity-led reveal — the reference explicitly prefers fades over slides. */
+[data-reveal] {
+  --in: 0;
+  opacity: var(--in);
+  transform: translate3d(0, calc((1 - var(--in)) * 14px), 0);
+  transition:
+    opacity 0.9s var(--ease-ui) var(--d, 0ms),
+    transform 0.9s var(--ease-ui) var(--d, 0ms);
+}
+
+/* --- ambient field --------------------------------------------------
+   The same room as the hero, not a flat panel bolted underneath it. Sits
+   behind the content and above the section's flat black. ---------------- */
+.ml-prop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(52% 34% at 78% 8%, rgba(112, 66, 240, 0.17) 0%, rgba(0, 0, 0, 0) 70%),
+    radial-gradient(64% 40% at 8% 62%, rgba(76, 40, 190, 0.13) 0%, rgba(0, 0, 0, 0) 72%);
+}
+
+.ml-prop-inner { position: relative; z-index: 1; }
+
+/* --- heading ------------------------------------------------------- */
+.ml-prop-head { max-width: 62rem; }
+
+.ml-prop-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-chrome);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+.ml-prop-eyebrow span {
+  width: 32px;
+  height: 1px;
+  background: var(--ash);
+}
+
+/* Scale carries the hierarchy, not weight — the same rule the work section
+   follows, and the reason those headlines read sculptural rather than
+   shouty. Bigger, lighter, tracked well negative. */
+.ml-prop-title {
+  margin-top: 22px;
+  font-family: var(--font-head);
+  font-weight: 500;
+  font-size: clamp(2.3rem, 5.2vw, 4.3rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--white);
+}
+.ml-prop-title span {
+  display: block;
+  color: #a78bfa;
+}
+
+.ml-prop-lede {
+  margin-top: var(--space-28);
+  max-width: 38rem;
+  color: var(--mist);
+}
+
+/* --- plans ----------------------------------------------------------
+   Glass panels with a lit edge, matching the work cards. The ghost-hairline
+   version was truer to the stripped reference system, but that system has
+   nothing to sell — these panels carry the prices, and the glow is what
+   makes them read as lit surfaces floating in the dark rather than
+   rectangles ruled onto the page.
+   --------------------------------------------------------------------- */
+.ml-prop-plans {
+  margin-top: clamp(48px, 7vh, 86px);
+  display: grid;
+  gap: clamp(18px, 2vw, 28px);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  align-items: stretch;
+}
+
+.ml-prop-plan {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: clamp(26px, 3vw, 38px);
+
+  border-radius: 18px;
+  background: linear-gradient(155deg, rgba(30, 26, 56, 0.66), rgba(9, 7, 18, 0.92));
+  /* Layered edge: an inner highlight along the top, a hairline rim, an outer
+     bloom, then a contact shadow. Four cheap shadows read as a lit pane of
+     glass; one flat border reads as a box. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 0 1px rgba(170, 150, 255, 0.26),
+    0 0 20px -4px rgba(140, 110, 255, 0.2),
+    0 34px 80px -30px rgba(0, 0, 0, 0.95);
+
+  /* --lift rides inside the reveal's own translate so a hover cannot cancel
+     the entrance animation by overwriting `transform`. */
+  transform: translate3d(0, calc((1 - var(--in, 0)) * 14px - var(--lift, 0px)), 0);
+  transition:
+    opacity 0.9s var(--ease-ui) var(--d, 0ms),
+    transform 0.55s var(--ease-ui) var(--d, 0ms),
+    box-shadow 0.55s var(--ease-ui);
+}
+
+.ml-prop-plan.is-featured {
+  background: linear-gradient(155deg, rgba(46, 36, 92, 0.7), rgba(11, 8, 24, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 0 0 1px rgba(186, 166, 255, 0.5),
+    0 0 30px -4px rgba(140, 110, 255, 0.38),
+    0 40px 90px -30px rgba(0, 0, 0, 0.95);
+}
+
+.ml-prop-plan:hover {
+  --lift: 5px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 0 0 1px rgba(196, 178, 255, 0.55),
+    0 0 34px -4px rgba(140, 110, 255, 0.42),
+    0 44px 96px -30px rgba(0, 0, 0, 0.95);
+}
+
+/* Spotlight. --mx/--my are written on pointermove; --glow gates it so the
+   light fades in and out rather than snapping on at the card's edge. */
+.ml-prop-plan::before,
+.ml-prop-promises li::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    340px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(154, 122, 255, 0.22),
+    rgba(154, 122, 255, 0.06) 42%,
+    rgba(0, 0, 0, 0) 72%
+  );
+  opacity: var(--glow, 0);
+  transition: opacity 0.45s var(--ease-ui);
+}
+
+/* Diagonal specular sweep — what stops a panel reading as a flat rectangle. */
+.ml-prop-plan::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    118deg,
+    rgba(255, 255, 255, 0.09) 0%,
+    rgba(255, 255, 255, 0) 44%,
+    rgba(196, 178, 255, 0.06) 100%
+  );
+}
+
+/* The one badge in the section. Rationed, like the violet pill. */
+.ml-prop-flag {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  background: rgba(124, 92, 255, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(186, 166, 255, 0.45);
+  font-family: var(--font-chrome);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #d6c8ff;
+}
+
+.ml-prop-tag { color: var(--fog); }
+
+.ml-prop-price {
+  margin-top: var(--space-16);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--font-head);
+  font-size: clamp(3rem, 5.4vw, 4.4rem);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  color: var(--white);
+}
+.ml-prop-price span {
+  font-family: var(--font-chrome);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+
+.ml-prop-pitch {
+  margin-top: var(--space-16);
+  color: var(--mist);
+}
+
+.ml-prop-features {
+  margin: var(--space-28) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  width: 100%;
+}
+.ml-prop-features li {
+  display: grid;
+  grid-template-columns: 15px 1fr;
+  align-items: start;
+  gap: 11px;
+  padding-top: 11px;
+  /* Far lighter than the old --ash rule. On a lit panel a 30% white hairline
+     reads as a scored line; this reads as a fold. */
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  font-family: var(--font-chrome);
+  font-size: var(--text-body-sm);
+  letter-spacing: 0.01em;
+  color: var(--mist);
+}
+.ml-prop-features li svg {
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  color: #8b72ff;
+}
+.is-featured .ml-prop-features li svg { color: #b9a4ff; }
+
+.ml-prop-cta { margin-top: auto; }
+.ml-prop-plan .ml-ghost {
+  padding: 11px 22px;
+  border-radius: var(--radius-pill);
+  border-color: rgba(255, 255, 255, 0.28);
+  font-size: var(--text-body);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.ml-prop-plan .ml-pill { background: #7c5cff; }
+
+/* --- promises -------------------------------------------------------- */
+.ml-prop-promises {
+  margin-top: clamp(64px, 10vh, 116px);
+  display: grid;
+  gap: clamp(14px, 1.6vw, 20px);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+.ml-prop-promises li {
+  position: relative;
+  isolation: isolate;
+  /* No padding on the card itself — the render bleeds into the top two
+     corners the way Framer's gallery cells do, and the copy is padded
+     separately below it. */
+  padding: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(24, 21, 46, 0.5), rgba(7, 6, 14, 0.8));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 1px rgba(150, 132, 220, 0.16);
+  /* Opacity and transform have to be restated here. This selector is more
+     specific than [data-reveal], so declaring only box-shadow would replace
+     that rule's transition wholesale and the reveal would snap in. */
+  transition:
+    opacity 0.9s var(--ease-ui) var(--d, 0ms),
+    transform 0.9s var(--ease-ui) var(--d, 0ms),
+    box-shadow 0.5s var(--ease-ui);
+}
+.ml-prop-promises li:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 0 0 1px rgba(180, 160, 255, 0.4),
+    0 0 26px -6px rgba(140, 110, 255, 0.32);
+}
+
+/* A single warm-free accent numeral. Chromatic tension against all that
+   violet is what stops a monochrome palette going flat. */
+.ml-prop-promise-no {
+  display: block;
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(167, 139, 250, 0.75);
+}
+
+.ml-prop-promise-title {
+  margin-top: 14px;
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--white);
+}
+.ml-prop-promise-body {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--fog);
+}
+
+@media (max-width: 640px) {
+  .ml-prop-plan { padding: var(--space-18); }
+  .ml-prop-flag { top: 14px; right: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ml-prop-plan,
+  .ml-prop-promises li { transition: none; }
+  .ml-prop-plan::before,
+  .ml-prop-promises li::before { display: none; }
+}
+
+/* --- promise sculptures ----------------------------------------------
+   A family of abstract glass forms rendered in the hero's material
+   language, so the cards read as one set of objects rather than five
+   unrelated illustrations. They carry no information — the heading does
+   that — they exist to stop a wall of text going flat.
+   --------------------------------------------------------------------- */
+.ml-promise-shot {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #07060e;
+}
+.ml-promise-shot img {
+  object-fit: cover;
+  /* Held slightly back so the render never competes with the heading under
+     it, then lifted on hover along with the card's own edge glow. */
+  opacity: 0.9;
+  transform: scale(1.01);
+  transition:
+    opacity 0.6s var(--ease-ui),
+    transform 0.8s var(--ease-ui);
+}
+.ml-prop-promises li:hover .ml-promise-shot img {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* The render sits on near-black and the card does too, so without this the
+   image's lower edge just dissolves and the join looks unfinished. */
+.ml-promise-shot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 62%, rgba(7, 6, 14, 0.9) 100%);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.ml-promise-body { padding: clamp(20px, 2.2vw, 26px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ml-promise-shot img { transition: none; transform: none; }
+}
+
+@media (max-width: 760px) {
+  /* The mobile hero runs three phases across a 330vh range rather than one
+     across 256vh, so the overlap is retimed: the panel begins its wipe at
+     roughly 90% of that travel, once the copy has had its turn on screen. */
+  .ml-prop { margin-top: -141vh; }
+}
+
+@media (max-width: 760px) {
+  .ml-prop { padding: clamp(44px, 6.5vh, 80px) 0 clamp(48px, 7vh, 90px); }
+  .ml-prop-lede { margin-top: var(--space-18); }
+  .ml-prop-plans { margin-top: clamp(28px, 4vh, 44px); }
+  .ml-rail-wrap { margin-top: clamp(40px, 6vh, 68px); }
+}

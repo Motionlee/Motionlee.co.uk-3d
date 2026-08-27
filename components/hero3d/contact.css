@@ -1,0 +1,284 @@
+@import "./theme.css";
+
+/* ------------------------------------------------------------------
+   Contact — the last panel, in the hero's language.
+
+   Same glass-and-glow vocabulary as the pricing cards so the page reads as
+   one system, and the same reveal contract (--in written by an observer).
+   ------------------------------------------------------------------ */
+
+.ml-contact {
+  position: relative;
+  z-index: 2;
+  background: var(--void);
+  padding: clamp(90px, 14vh, 170px) 0 clamp(80px, 12vh, 140px);
+}
+
+/* Ambient violet, mirrored from the left so the page does not end on the
+   same lighting it opened with. */
+.ml-contact::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(50% 36% at 14% 6%, rgba(112, 66, 240, 0.16) 0%, rgba(0, 0, 0, 0) 70%),
+    radial-gradient(62% 44% at 92% 72%, rgba(76, 40, 190, 0.14) 0%, rgba(0, 0, 0, 0) 72%);
+}
+
+.ml-contact-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-inline: clamp(24px, 5vw, 60px);
+  display: grid;
+  gap: clamp(40px, 6vw, 76px);
+  grid-template-columns: 0.85fr 1fr;
+  align-items: start;
+}
+
+/* Opacity-led reveal, scoped rather than borrowing the Proposition's global
+   [data-reveal] rule — this section has to stand on its own stylesheet. */
+.ml-contact [data-reveal] {
+  --in: 0;
+  opacity: var(--in);
+  transform: translate3d(0, calc((1 - var(--in)) * 14px), 0);
+  transition:
+    opacity 0.9s var(--ease-ui) var(--d, 0ms),
+    transform 0.9s var(--ease-ui) var(--d, 0ms);
+}
+
+/* --- left column ---------------------------------------------------- */
+.ml-contact-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-chrome);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+.ml-contact-eyebrow span {
+  width: 32px;
+  height: 1px;
+  background: var(--ash);
+}
+
+/* Scale carries the hierarchy, not weight — same rule as the other two
+   section headings, which is what makes them read as one voice. */
+.ml-contact-title {
+  margin-top: 22px;
+  font-family: var(--font-head);
+  font-weight: 500;
+  font-size: clamp(2.1rem, 4.4vw, 3.5rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--white);
+}
+.ml-contact-title span {
+  display: block;
+  color: #a78bfa;
+}
+
+.ml-contact-lede {
+  margin-top: var(--space-28);
+  max-width: 34rem;
+  color: var(--mist);
+}
+
+.ml-contact-facts {
+  margin-top: clamp(34px, 5vh, 52px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-28);
+}
+.ml-contact-facts > div {
+  padding-top: var(--space-16);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.ml-contact-facts dt {
+  font-family: var(--font-chrome);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+.ml-contact-facts dd {
+  margin-top: 8px;
+  font-family: var(--font-chrome);
+  font-size: 17px;
+  color: var(--white);
+}
+.ml-contact-facts a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(167, 139, 250, 0.5);
+  padding-bottom: 2px;
+  transition: border-color var(--dur-micro) var(--ease-ui);
+}
+.ml-contact-facts a:hover { border-bottom-color: #a78bfa; }
+
+/* --- the form panel -------------------------------------------------
+   Same four-layer lit edge as the pricing cards. --------------------- */
+.ml-contact-form {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(26px, 3vw, 40px);
+  border-radius: 18px;
+  background: linear-gradient(155deg, rgba(30, 26, 56, 0.66), rgba(9, 7, 18, 0.92));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 0 1px rgba(170, 150, 255, 0.26),
+    0 0 20px -4px rgba(140, 110, 255, 0.2),
+    0 34px 80px -30px rgba(0, 0, 0, 0.95);
+}
+
+/* Cursor spotlight, matching the pricing cards. */
+.ml-contact-form::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    340px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(154, 122, 255, 0.2),
+    rgba(154, 122, 255, 0.05) 42%,
+    rgba(0, 0, 0, 0) 72%
+  );
+  opacity: var(--glow, 0);
+  transition: opacity 0.45s var(--ease-ui);
+}
+
+/* Diagonal specular sweep — what stops a panel reading as a flat rectangle. */
+.ml-contact-form::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    118deg,
+    rgba(255, 255, 255, 0.09) 0%,
+    rgba(255, 255, 255, 0) 44%,
+    rgba(196, 178, 255, 0.06) 100%
+  );
+}
+
+/* --- fields ---------------------------------------------------------- */
+.ml-field-row {
+  display: grid;
+  gap: var(--space-16);
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Every field spaces itself from what precedes it; the two inside the paired
+   row are laid out by the grid instead. */
+.ml-field { margin-top: var(--space-16); }
+.ml-field-row .ml-field { margin-top: 0; }
+
+.ml-field label {
+  display: block;
+  margin-bottom: 9px;
+  font-family: var(--font-chrome);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+
+.ml-field input,
+.ml-field select,
+.ml-field textarea {
+  width: 100%;
+  padding: 13px 15px;
+  border-radius: var(--radius-card);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  font-family: var(--font-chrome);
+  font-size: 15px;
+  color: var(--white);
+  transition:
+    border-color var(--dur-micro) var(--ease-ui),
+    background var(--dur-micro) var(--ease-ui),
+    box-shadow var(--dur-micro) var(--ease-ui);
+}
+.ml-field textarea { resize: none; }
+
+.ml-field input::placeholder,
+.ml-field textarea::placeholder { color: rgba(255, 255, 255, 0.26); }
+
+/* Violet focus, not the browser's blue — and a ring rather than an outline
+   so it reads as the field lighting up. */
+.ml-field input:focus,
+.ml-field select:focus,
+.ml-field textarea:focus {
+  outline: none;
+  border-color: rgba(167, 139, 250, 0.7);
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.18);
+}
+
+/* The dropdown list itself is painted by the OS, so it needs a real colour —
+   left transparent it renders black-on-black in a dark UI. */
+.ml-field select option { background: #14112a; color: #fff; }
+
+.ml-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Scoped through the form so it beats .ml-pill regardless of how the
+   bundler orders these two stylesheets. At equal specificity the winner is
+   whichever file lands last, which is not ours to decide. */
+.ml-contact-form .ml-contact-send {
+  margin-top: var(--space-28);
+  width: 100%;
+  justify-content: center;
+  background: #7c5cff;
+  cursor: pointer;
+  transition: opacity var(--dur-micro) var(--ease-ui);
+}
+.ml-contact-form .ml-contact-send:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ml-contact-status {
+  margin-top: var(--space-16);
+  min-height: 20px;
+  text-align: center;
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+}
+.ml-contact-status .is-ok { color: #a78bfa; }
+.ml-contact-status .is-bad { color: #ff8b8b; }
+
+@media (max-width: 900px) {
+  .ml-contact-inner { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .ml-field-row { grid-template-columns: 1fr; }
+  .ml-field-row .ml-field + .ml-field { margin-top: var(--space-16); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ml-contact [data-reveal] { transition: none; }
+  .ml-contact-form::before { display: none; }
+}
+
+@media (max-width: 760px) {
+  .ml-contact { padding: clamp(48px, 7vh, 90px) 0 clamp(44px, 6.5vh, 80px); }
+  .ml-contact-lede { margin-top: var(--space-18); }
+  .ml-contact-facts { margin-top: clamp(24px, 3.5vh, 36px); }
+  .ml-contact-inner { gap: clamp(28px, 4vh, 44px); }
+}

@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0B0B0C;
+  --color-ink-2: #141416;
+  --color-ink-3: #1C1C20;
+  --color-paper: #EEEDE8;
+  --color-paper-2: #F7F7F5;
+  --color-lime: #D6FF3F;
+  --color-lime-dim: #A8CC2B;
+  --color-indigo: #4338CA;
+  --color-indigo-2: #6056D6;
+  --color-muted: #9CA3AF;
+  --color-grey: #6B7280;
+
+  --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --hairline: rgba(255, 255, 255, 0.08);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  /* Must live here, not on `body`. On body it makes body a scroll container
+     whose clientHeight equals its scrollHeight, so scrollIntoView() finds it,
+     fails to scroll it, and never reaches documentElement — which silently
+     breaks every on-page anchor link. */
+  overflow-x: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  /* Pure black, not --color-ink (#0B0B0C). The new sections all paint
+     --void (#000), so anywhere one of them did not reach — a margin between
+     two of them, the tail of a transformed section — the body's near-black
+     showed through as a grey band. */
+  background: #000;
+  color: #fff;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--color-lime); color: var(--color-ink); }
+
+:focus-visible {
+  outline: 2px solid var(--color-lime);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 0.94;
+  text-wrap: balance;
+}
+
+.outline-text {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--color-lime);
+  paint-order: stroke fill;
+}
+@media (min-width: 768px) {
+  .outline-text { -webkit-text-stroke-width: 2px; }
+}
+
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 38s linear infinite;
+}
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+.grid-bg {
+  background-image:
+    linear-gradient(var(--hairline) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hairline) 1px, transparent 1px);
+  background-size: 88px 88px;
+}
+
+.noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Clear the fixed header when jumping to an on-page anchor. */
+section[id] {
+  scroll-margin-top: 88px;
+}

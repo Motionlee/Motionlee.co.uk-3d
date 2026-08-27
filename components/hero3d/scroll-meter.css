@@ -1,0 +1,76 @@
+/* ------------------------------------------------------------------
+   Scroll readout — bottom right, balancing "scroll to discover" on the
+   left. Quiet enough to ignore, precise enough to design against.
+   ------------------------------------------------------------------ */
+
+.ml-meter {
+  position: fixed;
+  right: clamp(18px, 2.4vw, 34px);
+  bottom: clamp(20px, 3vh, 38px);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  pointer-events: none;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Fades up as you leave the very top, so the first view stays clean. */
+  opacity: 0.9;
+}
+
+/* --- vertical rail --- */
+.ml-meter-rail {
+  position: relative;
+  width: 2px;
+  height: 46px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+.ml-meter-fill {
+  position: absolute;
+  inset: 0;
+  transform: scaleY(0);
+  transform-origin: top;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #a78bfa, #7c5cff);
+  box-shadow: 0 0 10px rgba(124, 92, 255, 0.8);
+}
+
+/* --- number --- */
+.ml-meter-read {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  /* Tabular figures, or the pill jitters as the digits change width. */
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+.ml-meter-num {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.92);
+  /* Reserve the width of three digits so 9 -> 10 -> 100 doesn't shift. */
+  min-width: 2.1ch;
+  text-align: right;
+}
+.ml-meter-pct {
+  font-size: 9px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+/* --- section label --- */
+.ml-meter-label {
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(167, 139, 250, 0.85);
+  min-width: 4ch;
+}
+
+@media (max-width: 640px) {
+  .ml-meter-label { display: none; }
+  .ml-meter-rail { height: 34px; }
+}

@@ -1,0 +1,114 @@
+@import "./theme.css";
+@import "./sections.css";
+
+/* ------------------------------------------------------------------
+   Legal pages. Long-form reading, so the measure is narrow and the prose
+   set larger than the marketing pages — but the same palette and type,
+   so they do not read as a different site.
+   ------------------------------------------------------------------ */
+
+.ml-legal {
+  position: relative;
+  z-index: 2;
+  background: var(--void);
+  padding: clamp(110px, 15vh, 180px) 0 clamp(56px, 8vh, 96px);
+}
+
+.ml-legal-inner {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding-inline: clamp(24px, 5vw, 60px);
+}
+
+.ml-legal-title {
+  margin-top: 22px;
+  font-family: var(--font-head);
+  font-weight: 500;
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--white);
+}
+
+.ml-legal-meta {
+  margin-top: 14px;
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+  color: var(--fog);
+}
+
+.ml-legal-intro {
+  margin-top: var(--space-28);
+  padding-bottom: var(--space-28);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 17px;
+  color: var(--mist);
+}
+
+.ml-legal-section { margin-top: clamp(32px, 4.5vh, 46px); }
+
+.ml-legal-section h2 {
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--white);
+}
+
+.ml-legal-section .ml-prose {
+  margin-top: var(--space-12);
+  color: var(--mist);
+}
+
+/* The company information section carries a table. */
+.ml-legal-section table {
+  margin-top: var(--space-12);
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-chrome);
+  font-size: 15px;
+}
+.ml-legal-section td {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--mist);
+  vertical-align: top;
+}
+.ml-legal-section td:first-child {
+  width: 40%;
+  padding-right: var(--space-16);
+  color: var(--fog);
+}
+
+.ml-legal-close {
+  margin-top: clamp(40px, 6vh, 64px);
+  padding-top: var(--space-28);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: var(--font-prose);
+  font-size: var(--text-prose);
+  line-height: var(--leading-prose);
+  color: var(--mist);
+}
+.ml-legal-close strong { color: var(--white); }
+
+.ml-legal-more {
+  margin-top: clamp(32px, 4.5vh, 44px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-18);
+}
+.ml-legal-more a {
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+  color: var(--mist);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(167, 139, 250, 0.45);
+  padding-bottom: 3px;
+  transition: color var(--dur-micro) var(--ease-ui);
+}
+.ml-legal-more a:hover { color: var(--white); }
+
+@media (max-width: 760px) {
+  .ml-legal { padding: clamp(96px, 13vh, 130px) 0 clamp(44px, 6.5vh, 70px); }
+  .ml-legal-more a { display: inline-flex; align-items: center; min-height: 44px; }
+}

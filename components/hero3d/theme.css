@@ -1,0 +1,210 @@
+/* ------------------------------------------------------------------
+   Motionlee — design tokens.
+
+   Modelled on the Active Theory system: the rendered scene carries all
+   chromatic weight, and the UI recedes so it can. Every rule here exists to
+   keep chrome quiet — hairline borders instead of shadows, translucency
+   instead of elevation, micro type instead of display type, and exactly one
+   saturated colour.
+   ------------------------------------------------------------------ */
+
+:root {
+  /* --- colour: achromatic, plus one accent --------------------------- */
+  --void: #000000;          /* the only canvas colour — never a grey page */
+  --white: #ffffff;         /* primary text */
+  --ash: #4d4d4d;           /* card borders, hairline dividers */
+  --smoke: #808080;         /* ghost button borders, secondary chrome */
+  --fog: #999999;           /* structural separators, muted labels */
+  --mist: #c6c6c6;          /* tertiary text, link default */
+  --dusk: #343755;          /* the ONLY chromatic surface — filled CTAs */
+
+  /* Translucent surfaces. Depth comes from what they obscure behind them,
+     not from light they cast forward — there is no light source in space. */
+  --surface-overlay: rgba(0, 0, 0, 0.5);
+  --surface-frost: rgba(255, 255, 255, 0.1);
+  --hairline: rgba(255, 255, 255, 0.6);
+
+  /* --- type ---------------------------------------------------------- */
+  /* Geometric sans for all chrome: nav, labels, buttons. */
+  --font-chrome: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Serif for prose. The counterpoint is deliberate — it separates written
+     voice from interface, and keeping it system-default is part of the
+     anti-decoration stance. */
+  /* Display face. One token so the family is swappable in a single place —
+     it was hard-coded as a three-deep fallback chain in fifteen rules. */
+  --font-head: var(--font-outfit), var(--font-inter), sans-serif;
+  /* Body was Times. A serif paragraph under a geometric sans heading is the
+     single most un-Framer thing on the page — their body is Inter 400. */
+  --font-prose: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --text-caption: 10px;
+  --text-body-sm: 12px;
+  --text-body: 14px;
+  --text-prose: 16px;
+  /* 1.88 was set for Times. Inter at 16px wants ~1.6 or the
+     paragraph falls apart into stripes. */
+  --leading-prose: 1.62;
+
+  /* --- shape --------------------------------------------------------- */
+  /* Only two radii. Intermediate values read as accidental. */
+  --radius-ghost: 5px;
+  --radius-card: 12px;
+  --radius-pill: 500px;
+
+  /* --- spacing ------------------------------------------------------- */
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-18: 18px;
+  --space-28: 28px;
+  --section-gap: 48px;
+
+  /* --- motion -------------------------------------------------------- */
+  /* Plain `ease`, not a designer bezier: organic rather than robotic. Micro
+     interactions are quick; scene transitions are unhurried. */
+  --ease-ui: ease;
+  --dur-micro: 0.3s;
+  --dur-scene: 1.2s;
+}
+
+/* --- primitives ------------------------------------------------------ */
+
+/* Ghost control: hairline border, no fill. Dissolves into the canvas. */
+.ml-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: 3px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-ghost);
+  background: transparent;
+  color: var(--white);
+  font-family: var(--font-chrome);
+  font-size: var(--text-body-sm);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: background var(--dur-micro) var(--ease-ui);
+}
+.ml-ghost:hover { background: var(--surface-frost); }
+
+/* The single chromatic control. Rationed — one per view. */
+.ml-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: 11px 22px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--dusk);
+  color: var(--white);
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: opacity var(--dur-micro) var(--ease-ui);
+}
+.ml-pill:hover { opacity: 0.86; }
+
+/* Card: defined by a hairline, never a shadow. The void cannot cast one. */
+.ml-panel {
+  border: 1px solid var(--ash);
+  border-radius: var(--radius-card);
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Overlay panels read as frosted glass over the scene. */
+.ml-frost {
+  background: var(--surface-overlay);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: var(--radius-card);
+}
+
+/* Prose gets the serif and generous leading. */
+.ml-prose {
+  font-family: var(--font-prose);
+  font-size: var(--text-prose);
+  line-height: var(--leading-prose);
+  color: var(--white);
+}
+
+/* Micro label — the workhorse for nav, metadata and eyebrows. */
+.ml-label {
+  font-family: var(--font-chrome);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+
+/* ==================================================================
+   Phones
+   Measured on a 375x667 iPhone SE before writing any of this.
+   ================================================================== */
+@media (max-width: 760px) {
+  /* iOS Safari zooms the whole page when a focused field is under 16px.
+     Every field here was 15px, so tapping "Your name" jerked the layout and
+     left the visitor pinched in. This is the single most common mobile form
+     defect and it costs nothing to avoid. */
+  .ml-field input,
+  .ml-field select,
+  .ml-field textarea {
+    font-size: 16px;
+  }
+
+  /* The plan features are the argument for the price, and they were set at
+     12px — readable on a desktop at arm's length, small on a phone. */
+  .ml-prop-features li {
+    font-size: 14px;
+    gap: 12px;
+  }
+
+  /* Micro-labels lose their tracking legibility below ~11px on a phone. */
+  .ml-label,
+  .ml-field label,
+  .ml-work-sector,
+  .ml-chip-sub {
+    font-size: 11px;
+  }
+
+  /* The footer's small print carries the concept-work disclaimer, which is a
+     statement worth being able to read rather than boilerplate. */
+  .ml-footer-base { font-size: 12px; }
+
+  /* Touch targets. Apple asks for 44pt; these were inline links between 20
+     and 36px tall, which is a miss-and-try-again on a moving bus. Padding
+     rather than a min-height so the text stays where the design put it. */
+  /* Both wordmarks, not just the nav one — the footer carries the same
+     markup and was missed on the first pass because the audit printed only
+     the link text and the two are identical. */
+  .ml-nav-logo,
+  .ml-footer-logo {
+    min-height: 44px;
+    align-items: center;
+  }
+  .ml-work-all,
+  .ml-sec-note a,
+  .ml-contact-facts a,
+  .ml-footer-col a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  /* The footer's list gaps can shrink to compensate, or the column doubles
+     in height for no reason. */
+  .ml-footer-col ul { gap: 0; }
+
+  /* The primary action came out at 43px — one short of the 44 Apple asks
+     for, which is exactly the kind of thing that only shows up when you
+     measure it. */
+  .ml-contact-form .ml-contact-send,
+  .ml-band .ml-band-cta,
+  .ml-nav .ml-nav-panel-cta {
+    min-height: 48px;
+  }
+}

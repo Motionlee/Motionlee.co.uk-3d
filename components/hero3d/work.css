@@ -1,0 +1,394 @@
+@import "./theme.css";
+
+/* ------------------------------------------------------------------
+   Selected work — a scroll-driven conveyor.
+
+   --p (0..1) is written once per frame by WorkShowcase3D and describes how
+   far through the section we are. Every card derives its own position from
+   it, so N cards animating costs one loop and no re-renders.
+   ------------------------------------------------------------------ */
+
+.ml-work {
+  position: relative;
+  background: var(--void);
+  /* Follows the Proposition normally. This used to carry margin-top:-100vh,
+     written when the work section sat directly under the hero — but the
+     Proposition was inserted between them, so that pull was clipping the
+     last screen of the pricing instead of overlapping the hero. */
+  margin-top: 0;
+  z-index: 2;
+}
+
+.ml-work-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--void);
+  /* Clear the floating nav. The pin centres its content in the viewport, so
+     without this the eyebrow and the "see all" link came to rest underneath
+     a bar that ends at ~82px. */
+  padding-top: 104px;
+}
+
+/* The pin is 100svh with overflow hidden, so when the section ends its
+   bottom edge slices straight through whatever card is there. This dissolves
+   the last 120px into black so the content leaves rather than being cut. */
+.ml-work-pin::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 120px;
+  z-index: 5;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), var(--void));
+}
+
+/* Ambient violet, so the section reads as the same room as the hero
+   rather than a flat panel bolted underneath it. */
+.ml-work-pin::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+      radial-gradient(58% 60% at 78% 44%, rgba(112, 66, 240, 0.2) 0%, rgba(0, 0, 0, 0) 72%),
+    radial-gradient(90% 70% at 12% 96%, rgba(76, 40, 190, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+/* --- heading ------------------------------------------------------- */
+.ml-work-head {
+  position: relative;
+  z-index: 2;
+  padding: 0 clamp(24px, 5vw, 76px);
+  /* Full width, so the "see all" link reaches the right edge instead of
+     stopping at the old 780px cap and floating mid-page. The measure is set
+     on the title and lede themselves. */
+  /* Recedes as the cards take over, rather than competing with them. */
+  opacity: calc(1 - var(--p, 0) * 1.5);
+  transform: translate3d(0, calc(var(--p, 0) * -40px), 0);
+}
+
+.ml-work-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+.ml-work-eyebrow span {
+  width: 32px;
+  height: 1px;
+  background: var(--ash);
+}
+
+/* Scale carries the hierarchy, not weight — the reference spec's central
+   idea, and the reason its headlines read sculptural rather than shouty.
+   Bigger, lighter, and tracked well negative. */
+.ml-work-title {
+  margin-top: 22px;
+  font-family: var(--font-head);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  /* Was 7rem — 109px on a 1440 frame, nearly twice every other section
+     heading on the site, and it ate 578px of a 900px pin so the cards below
+     it were cut off. Now the same scale as the rest. */
+  font-size: clamp(2.1rem, 4.6vw, 3.6rem);
+  color: #fff;
+}
+.ml-work-title span {
+  display: block;
+  color: #a78bfa;
+}
+
+/* Body kept deliberately light. Most sites reach for 400 here; dropping it
+   makes the paragraph feel airy against the display type instead of
+   competing with it. */
+.ml-work-lede {
+  margin-top: 20px;
+  max-width: 34rem;
+  /* Ultra-light body is the reference's signature — most sites use 400 here,
+     and stripping it is what makes the paragraph feel airy beside display
+     type rather than competing with it. */
+  font-family: var(--font-prose);
+  font-size: var(--text-prose);
+  line-height: var(--leading-prose);
+  font-weight: 400;
+  color: var(--white);
+}
+
+/* --- conveyor ------------------------------------------------------ */
+.ml-work-track {
+  --gap: clamp(20px, 2.4vw, 40px);
+  /* Much wider. At 27vw these were ~390px on a 1440 frame — three small
+     tiles rather than work you can actually look at. */
+  --card-w: clamp(300px, min(38vw, 56svh), 580px);
+  --stride: calc(var(--card-w) + var(--gap));
+
+  position: relative;
+  z-index: 2;
+  margin-top: clamp(20px, 2.6vh, 32px);
+  display: flex;
+  gap: var(--gap);
+  padding-inline: clamp(24px, 5vw, 76px);
+  /* The whole rail slides left; each card then adjusts itself relative to
+     the centre of the viewport. */
+  transform: translate3d(calc(var(--p, 0) * (var(--count) - 1) * var(--stride) * -1), 0, 0);
+  will-change: transform;
+}
+
+.ml-work-card {
+  /* Distance from the card currently centred, in card units. */
+  --d: calc(var(--i) - var(--p, 0) * (var(--count) - 1));
+
+  position: relative;
+  flex: 0 0 var(--card-w);
+  /* No container. No border, no shadow, no fill, no radius on the card
+     itself — the image and the type float on the void with whitespace as the
+     only separator. This is the single biggest change toward the reference:
+     its rule is that the void *is* the design, and any surface breaks the
+     floating quality. */
+  /* Glass panel with a lit edge. The stripped ghost version was truer to the
+     Active Theory system, but that system has no imagery to hold — these
+     cards exist to present six brand sites, and the glow is what makes them
+     read as screens floating in the dark rather than flat crops. */
+  border-radius: 18px;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(155deg, rgba(30, 26, 56, 0.72), rgba(9, 7, 18, 0.9));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 0 1px rgba(170, 150, 255, 0.4),
+    0 0 16px 0 rgba(140, 110, 255, 0.32),
+    0 34px 80px -24px rgba(0, 0, 0, 0.95);
+  padding: 0 0 var(--space-28);
+
+  transform:
+    perspective(1400px)
+    rotateY(calc(var(--d) * -6deg))
+    scale(calc(1 - min(abs(var(--d)), 3) * 0.06));
+  opacity: calc(1 - min(abs(var(--d)), 3) * 0.32);
+  will-change: transform, opacity;
+}
+
+
+/* Diagonal specular sweep — what stops a panel reading as a flat rectangle. */
+.ml-work-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(
+    118deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0) 46%,
+    rgba(196, 178, 255, 0.08) 100%
+  );
+}
+
+/* --- card content --------------------------------------------------- */
+.ml-work-shot {
+  position: relative;
+  z-index: 2;
+  /* 3:2, matching the source files exactly. They are 1800x1200, so a 4:3
+     crop was shaving 11% off each side — straight through the brand lockup,
+     which sits hard left on every one of these key visuals. */
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  /* A large rounded crop with no frame or overlay — the reference's one
+     concession to imagery. */
+  border-radius: 0;
+}
+.ml-work-shot img { object-fit: cover; }
+
+.ml-work-shot-fade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 62%, rgba(0, 0, 0, 0.5) 100%);
+}
+/* A label, not a chip. Hierarchy from tracking and colour alone. */
+.ml-work-badge {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  z-index: 2;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mist);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+}
+
+.ml-work-body {
+  position: relative;
+  z-index: 3;
+  padding: 20px 22px 0;
+}
+.ml-work-sector {
+  font-family: var(--font-chrome);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+.ml-work-name {
+  margin-top: 8px;
+  font-family: var(--font-head);
+  /* Weight 400, never bold — scale and tracking carry the hierarchy. */
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-size: clamp(2rem, 3vw, 2.9rem);
+  color: #fff;
+}
+.ml-work-strap {
+  margin-top: var(--space-6);
+  font-family: var(--font-prose);
+  font-size: var(--text-prose);
+  color: var(--mist);
+}
+.ml-work-summary {
+  margin-top: var(--space-12);
+  font-family: var(--font-prose);
+  font-size: var(--text-prose);
+  line-height: var(--leading-prose);
+  color: var(--mist);
+}
+.ml-work-tags {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.ml-work-tags span {
+  font-family: var(--font-chrome);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+.ml-work-tags span + span::before {
+  content: "·";
+  margin-right: 14px;
+  color: var(--ash);
+}
+
+/* A single warm accent against all that violet. The chromatic tension is
+   what stops a monochrome-violet palette feeling flat. */
+.ml-work-index {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  z-index: 3;
+  font-family: var(--font-head);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--mist);
+}
+.ml-work-index i {
+  font-style: normal;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+/* --- progress rail -------------------------------------------------- */
+.ml-work-progress {
+  /* In flow, not absolute. Pinned to the bottom of the pin it sat *over* the
+     track, and the centred card had a hairline drawn straight through it. */
+  position: relative;
+  z-index: 3;
+  margin: 18px clamp(24px, 5vw, 76px) 0;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.ml-work-progress span {
+  display: block;
+  height: 100%;
+  width: calc(var(--p, 0) * 100%);
+  border-radius: inherit;
+  background: var(--mist);
+  
+}
+
+@media (max-width: 760px) {
+  .ml-work-track { --card-w: 86vw; }
+  .ml-work-lede { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ml-work { height: auto !important; }
+  .ml-work-pin { position: static; height: auto; padding: 72px 0; }
+  .ml-work-pin::after { display: none; }
+  .ml-work-track {
+    transform: none;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .ml-work-card { transform: none; opacity: 1; }
+  .ml-work-head { opacity: 1; transform: none; }
+  .ml-work-progress { display: none; }
+}
+
+.ml-work-head-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-28);
+}
+
+/* Link out to the full portfolio, now that the home page shows three. */
+.ml-work-all {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+  color: var(--mist);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(167, 139, 250, 0.45);
+  padding-bottom: 3px;
+  transition: color var(--dur-micro) var(--ease-ui);
+}
+.ml-work-all:hover { color: #fff; }
+
+/* --- short viewports --------------------------------------------------
+   The pin is one viewport tall whatever that viewport is, so a laptop window
+   at 580-700px has to fit the same heading and card as a 900px one. Measured
+   overflow before this block: 78px at 580px tall, 90px at 700px. The lede is
+   the first thing to go — it repeats what the cards then show. */
+@media (max-height: 800px) {
+  .ml-work-pin { padding-top: 92px; }
+  .ml-work-lede { display: none; }
+  .ml-work-title {
+    margin-top: 14px;
+    font-size: clamp(1.7rem, 3.2vw, 2.4rem);
+  }
+  .ml-work-track { margin-top: 18px; }
+  .ml-work-body { padding: 14px 18px 0; }
+  .ml-work-name { font-size: clamp(1.5rem, 2.2vw, 2rem); }
+  .ml-work-card { padding-bottom: var(--space-18); }
+  .ml-work-progress { margin-top: 12px; }
+}
+
+@media (max-height: 640px) {
+  /* Tighter still: at this height the strapline is the last thing that can
+     go before the image itself starts losing meaningful size. */
+  .ml-work-strap { display: none; }
+  .ml-work-pin { padding-top: 84px; }
+}

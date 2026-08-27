@@ -1,0 +1,718 @@
+@import "./theme.css";
+
+/* ------------------------------------------------------------------
+   Shared section vocabulary.
+
+   Every band below the hero is built from the same four parts: an eyebrow
+   with a rule, a scale-led display heading with a violet second line, a
+   serif lede, and glass tiles with a lit edge. Defining them once is what
+   makes eight sections read as one site rather than eight templates.
+   ------------------------------------------------------------------ */
+
+.ml-sec {
+  position: relative;
+  z-index: 2;
+  background: var(--void);
+  padding: clamp(78px, 12vh, 150px) 0;
+}
+
+/* Ambient violet so each band reads as the same room as the hero. --ax/--ay
+   let a section place its light differently from its neighbours; a page
+   where every section is lit identically reads as a template. */
+.ml-sec::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    54% 38% at var(--ax, 80%) var(--ay, 6%),
+    rgba(112, 66, 240, 0.15) 0%,
+    rgba(0, 0, 0, 0) 70%
+  );
+}
+
+.ml-sec-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-inline: clamp(24px, 5vw, 60px);
+}
+
+/* Opacity-led reveal — the reference system explicitly prefers fades over
+   slides, so the travel is a nudge rather than a move. */
+.ml-sec [data-reveal] {
+  --in: 0;
+  opacity: var(--in);
+  transform: translate3d(0, calc((1 - var(--in)) * 14px), 0);
+  transition:
+    opacity 0.9s var(--ease-ui) var(--d, 0ms),
+    transform 0.9s var(--ease-ui) var(--d, 0ms);
+}
+
+/* --- heading -------------------------------------------------------- */
+.ml-sec-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-chrome);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+.ml-sec-eyebrow span {
+  width: 32px;
+  height: 1px;
+  background: var(--ash);
+}
+
+/* Scale carries the hierarchy, never weight. */
+.ml-sec-title {
+  margin-top: 22px;
+  max-width: 20ch;
+  font-family: var(--font-head);
+  font-weight: 500;
+  font-size: clamp(2.1rem, 4.6vw, 3.6rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--white);
+}
+.ml-sec-title span {
+  display: block;
+  color: #a78bfa;
+}
+
+.ml-sec-lede {
+  margin-top: var(--space-28);
+  max-width: 38rem;
+  color: var(--mist);
+}
+
+/* --- glass tile ------------------------------------------------------
+   The same four-layer lit edge as the pricing cards: inner highlight, rim,
+   bloom, contact shadow. One flat border reads as a box; four cheap shadows
+   read as a lit pane. --------------------------------------------------- */
+.ml-tile {
+  position: relative;
+  isolation: isolate;
+  border-radius: 16px;
+  padding: clamp(22px, 2.4vw, 30px);
+  background: linear-gradient(158deg, rgba(28, 24, 52, 0.6), rgba(8, 7, 16, 0.9));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    0 0 0 1px rgba(160, 142, 230, 0.2),
+    0 24px 60px -30px rgba(0, 0, 0, 0.95);
+  transition: box-shadow 0.5s var(--ease-ui);
+}
+.ml-tile:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 0 1px rgba(186, 166, 255, 0.42),
+    0 0 28px -6px rgba(140, 110, 255, 0.34),
+    0 24px 60px -30px rgba(0, 0, 0, 0.95);
+}
+
+/* Cursor spotlight. */
+.ml-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    300px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(154, 122, 255, 0.2),
+    rgba(154, 122, 255, 0.05) 42%,
+    rgba(0, 0, 0, 0) 72%
+  );
+  opacity: var(--glow, 0);
+  transition: opacity 0.45s var(--ease-ui);
+}
+
+.ml-tile-index {
+  display: block;
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(167, 139, 250, 0.75);
+}
+.ml-tile-title {
+  margin-top: 14px;
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--white);
+}
+.ml-tile-body {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--fog);
+}
+
+/* --- grids ------------------------------------------------------------ */
+.ml-grid-4 {
+  margin-top: clamp(44px, 6vh, 72px);
+  display: grid;
+  gap: clamp(14px, 1.6vw, 20px);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.ml-grid-3 {
+  margin-top: clamp(44px, 6vh, 72px);
+  display: grid;
+  gap: clamp(16px, 1.8vw, 24px);
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+}
+
+.ml-sec-note {
+  margin-top: clamp(28px, 4vh, 44px);
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+  color: var(--fog);
+}
+.ml-sec-note a {
+  color: var(--white);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(167, 139, 250, 0.5);
+  padding-bottom: 2px;
+}
+.ml-sec-note a:hover { border-bottom-color: #a78bfa; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ml-sec [data-reveal] { transition: none; }
+  .ml-tile { transition: none; }
+  .ml-tile::before { display: none; }
+}
+
+/* ==================================================================
+   Nav
+   ================================================================== */
+.ml-nav {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 50;
+  padding-inline: clamp(14px, 3vw, 30px);
+  /* No background and no border, ever. The header is only a positioner now;
+     anything painted at full width rules a line across the sculpture. */
+}
+
+/* The floating island. Transparent over the hero, then glass — genuinely
+   see-through rather than a dark bar, so the render keeps running underneath
+   it and the controls read as floating on top of the scene. */
+.ml-nav-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  border-radius: var(--radius-pill);
+  transition:
+    background 0.45s var(--ease-ui),
+    box-shadow 0.45s var(--ease-ui),
+    margin-top 0.45s var(--ease-ui),
+    backdrop-filter 0.45s var(--ease-ui);
+}
+
+.ml-nav.is-stuck .ml-nav-shell,
+.ml-nav.is-open .ml-nav-shell {
+  margin-top: clamp(10px, 1.4vh, 16px);
+  /* Low alpha and a strong blur, not a high-alpha tint. The blur is what
+     keeps white type legible over an unpredictable background while still
+     letting the scene through — opacity alone would force a choice between
+     readable and transparent. */
+  background: rgba(18, 14, 40, 0.44);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 0 1px rgba(170, 150, 255, 0.22),
+    0 18px 44px -22px rgba(0, 0, 0, 0.9);
+}
+
+/* Square off a little when the mobile menu is open — a tall pill looks like
+   a mistake. */
+.ml-nav.is-open .ml-nav-shell { border-radius: 26px; }
+
+.ml-nav-bar {
+  padding: 14px clamp(18px, 2.4vw, 26px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-28);
+}
+
+.ml-nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  color: var(--white);
+  text-decoration: none;
+}
+.ml-nav-logo span {
+  font-family: var(--font-chrome);
+  font-size: 15px;
+  font-weight: 300;
+  letter-spacing: 0.34em;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+}
+
+.ml-nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-28);
+}
+.ml-nav-links a {
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--mist);
+  /* Carries the label over whatever the sculpture is doing behind the glass. */
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+  text-decoration: none;
+  transition: color var(--dur-micro) var(--ease-ui);
+}
+.ml-nav-links a:hover { color: var(--white); }
+
+.ml-nav-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+}
+.ml-nav .ml-nav-cta {
+  background: #7c5cff;
+  padding: 10px 20px;
+  text-decoration: none;
+}
+
+.ml-nav-burger {
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  width: 40px;
+  height: 40px;
+  justify-content: center;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.ml-nav-burger span {
+  display: block;
+  height: 1px;
+  width: 24px;
+  background: rgba(255, 255, 255, 0.85);
+  transition: width var(--dur-micro) var(--ease-ui);
+}
+.ml-nav-burger span:last-child { width: 17px; }
+.ml-nav.is-open .ml-nav-burger span:last-child { width: 24px; }
+
+.ml-nav-panel {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--space-18) clamp(18px, 2.4vw, 26px) var(--space-28);
+}
+.ml-nav-panel[hidden] { display: none; }
+.ml-nav-panel nav { display: flex; flex-direction: column; }
+.ml-nav-panel a {
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--white);
+  text-decoration: none;
+}
+.ml-nav .ml-nav-panel-cta {
+  margin-top: var(--space-28);
+  width: 100%;
+  justify-content: center;
+  background: #7c5cff;
+  border-bottom: 0;
+}
+
+@media (max-width: 940px) {
+  .ml-nav-links { display: none; }
+  .ml-nav-burger { display: flex; }
+  .ml-nav .ml-nav-cta { display: none; }
+}
+@media (min-width: 941px) {
+  .ml-nav-panel { display: none; }
+}
+
+/* ==================================================================
+   Marquee
+   ================================================================== */
+.ml-marquee {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  background: var(--void);
+  border-block: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 17px 0;
+}
+.ml-marquee-track {
+  display: flex;
+  width: max-content;
+  /* The run is rendered twice and the track moves exactly one run's width,
+     so the second copy lands where the first started — no seam, ever. */
+  animation: ml-marquee 34s linear infinite;
+}
+.ml-marquee-run {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+.ml-marquee-run span {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding-inline: 16px;
+  font-family: var(--font-chrome);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--fog);
+}
+.ml-marquee-run i {
+  font-style: normal;
+  font-size: 7px;
+  color: rgba(167, 139, 250, 0.7);
+}
+@keyframes ml-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ml-marquee-track { animation: none; }
+}
+
+/* ==================================================================
+   Process
+   ================================================================== */
+.ml-steps { list-style: none; counter-reset: none; }
+.ml-step-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-12);
+}
+.ml-step-n {
+  font-family: var(--font-head);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  color: #a78bfa;
+}
+.ml-step-meta {
+  font-family: var(--font-chrome);
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+.ml-step-title { margin-top: var(--space-18); }
+
+/* ==================================================================
+   Services
+   ================================================================== */
+.ml-service {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(26px, 3vw, 34px);
+}
+.ml-service-n {
+  font-family: var(--font-head);
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.14);
+  transition: color 0.5s var(--ease-ui);
+}
+.ml-service:hover .ml-service-n { color: rgba(167, 139, 250, 0.55); }
+.ml-service-title {
+  margin-top: var(--space-18);
+  font-family: var(--font-head);
+  font-weight: 500;
+  font-size: 1.75rem;
+  letter-spacing: -0.03em;
+  color: var(--white);
+}
+.ml-service-body {
+  margin-top: var(--space-12);
+  flex: 1;
+  color: var(--mist);
+}
+.ml-service-price {
+  margin-top: var(--space-28);
+  padding-top: var(--space-18);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #a78bfa;
+}
+
+/* ==================================================================
+   About
+   ================================================================== */
+.ml-about-grid {
+  display: grid;
+  gap: clamp(36px, 5vw, 76px);
+  grid-template-columns: 0.8fr 1fr;
+  align-items: center;
+}
+.ml-about-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-28);
+  min-height: 420px;
+  padding: clamp(26px, 3vw, 36px);
+}
+.ml-about-mark {
+  margin-top: auto;
+  font-family: var(--font-head);
+  font-size: clamp(2rem, 4vw, 2.9rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  color: var(--white);
+}
+.ml-about-card-body {
+  max-width: 24rem;
+  font-size: 15px;
+  color: var(--fog);
+}
+.ml-about-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(124, 92, 255, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(186, 166, 255, 0.4);
+  font-family: var(--font-chrome);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #d6c8ff;
+}
+.ml-about-badge span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a78bfa;
+}
+.ml-about-prose {
+  margin-top: var(--space-28);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-18);
+  max-width: 36rem;
+  color: var(--mist);
+}
+.ml-about-facts {
+  margin-top: clamp(32px, 5vh, 48px);
+  padding-top: var(--space-28);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-28);
+}
+.ml-about-fact-value {
+  display: block;
+  font-family: var(--font-head);
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  color: #a78bfa;
+}
+.ml-about-fact-label {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--font-chrome);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--fog);
+}
+
+@media (max-width: 900px) {
+  .ml-about-grid { grid-template-columns: 1fr; }
+  .ml-about-card { min-height: 320px; }
+}
+
+/* ==================================================================
+   Footer
+   ================================================================== */
+.ml-footer {
+  position: relative;
+  z-index: 2;
+  background: var(--void);
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+.ml-footer-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(56px, 8vh, 86px) clamp(24px, 5vw, 60px) clamp(32px, 4vh, 44px);
+}
+.ml-footer-grid {
+  display: grid;
+  gap: clamp(32px, 4vw, 56px);
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+}
+.ml-footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--white);
+  text-decoration: none;
+}
+.ml-footer-logo span {
+  font-family: var(--font-chrome);
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: 0.32em;
+}
+.ml-footer-blurb {
+  margin-top: var(--space-18);
+  max-width: 20rem;
+  font-size: 15px;
+  color: var(--mist);
+}
+.ml-footer-place {
+  margin-top: var(--space-12);
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+  color: var(--fog);
+}
+.ml-footer-col ul {
+  margin-top: var(--space-18);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+.ml-footer-col a {
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+  color: var(--mist);
+  text-decoration: none;
+  transition: color var(--dur-micro) var(--ease-ui);
+}
+.ml-footer-col a:hover { color: var(--white); }
+
+.ml-footer-legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+}
+.ml-footer-legal a {
+  color: var(--mist);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  padding-bottom: 2px;
+  transition: color var(--dur-micro) var(--ease-ui), border-color var(--dur-micro) var(--ease-ui);
+}
+.ml-footer-legal a:hover {
+  color: var(--white);
+  border-bottom-color: rgba(167, 139, 250, 0.7);
+}
+
+.ml-footer-base {
+  margin-top: clamp(44px, 6vh, 72px);
+  padding-top: var(--space-28);
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  justify-content: space-between;
+  font-family: var(--font-chrome);
+  font-size: var(--text-body-sm);
+  color: var(--fog);
+}
+
+@media (max-width: 860px) {
+  .ml-footer-grid { grid-template-columns: 1fr 1fr; }
+  .ml-footer-brand { grid-column: 1 / -1; }
+}
+@media (max-width: 480px) {
+  .ml-footer-grid { grid-template-columns: 1fr; }
+}
+
+/* ==================================================================
+   Mid-page CTA band
+   ================================================================== */
+.ml-band {
+  position: relative;
+  z-index: 2;
+  background: var(--void);
+  padding: clamp(52px, 8vh, 92px) 0;
+}
+.ml-band-inner {
+  position: relative;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(28px, 3.4vw, 46px) clamp(26px, 3vw, 46px);
+  margin-inline: clamp(24px, 5vw, 60px);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-28);
+  flex-wrap: wrap;
+  background: linear-gradient(150deg, rgba(46, 36, 92, 0.6), rgba(9, 7, 18, 0.92));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 0 1px rgba(170, 150, 255, 0.34),
+    0 0 30px -6px rgba(140, 110, 255, 0.3);
+}
+@media (min-width: 1301px) {
+  /* Once the viewport is wider than the container plus its gutters the inline
+     margin would push it off-centre, so hand it back to auto. */
+  .ml-band-inner { margin-inline: auto; }
+}
+.ml-band-title {
+  font-family: var(--font-head);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 3vw, 2.3rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--white);
+}
+.ml-band-title span { display: block; color: #a78bfa; }
+.ml-band-note {
+  margin-top: var(--space-16);
+  font-size: 15px;
+  color: var(--mist);
+}
+.ml-band .ml-band-cta {
+  flex: none;
+  background: #7c5cff;
+  padding: 14px 26px;
+  text-decoration: none;
+}
+
+/* --- phones: close the gaps -------------------------------------------
+   12vh top and bottom means 200px of nothing between two sections on a
+   390x844 screen, which is a quarter of the viewport spent on air and reads
+   as the page being longer than it is. Roughly halved. ------------------ */
+@media (max-width: 760px) {
+  .ml-sec { padding: clamp(44px, 6.5vh, 80px) 0; }
+  .ml-sec-lede { margin-top: var(--space-18); }
+  .ml-grid-4, .ml-grid-3 { margin-top: clamp(26px, 3.5vh, 40px); }
+  .ml-sec-note { margin-top: clamp(20px, 2.6vh, 30px); }
+
+  .ml-band { padding: clamp(34px, 4.5vh, 56px) 0; }
+  .ml-about-facts { margin-top: clamp(22px, 3vh, 32px); padding-top: var(--space-18); }
+  .ml-about-prose { margin-top: var(--space-18); }
+  .ml-about-grid { gap: clamp(24px, 3.5vh, 36px); }
+
+  .ml-footer-inner { padding: clamp(38px, 5vh, 56px) clamp(24px, 5vw, 60px) clamp(24px, 3vh, 34px); }
+  .ml-footer-base { margin-top: clamp(28px, 4vh, 44px); padding-top: var(--space-18); }
+}

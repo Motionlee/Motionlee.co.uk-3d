@@ -1,0 +1,200 @@
+@import "./theme.css";
+
+/* ------------------------------------------------------------------
+   Site assistant. Same glass vocabulary as the nav and the cards, so it
+   reads as part of the site rather than a bolted-on third-party widget.
+   ------------------------------------------------------------------ */
+
+.ml-chat-fab {
+  position: fixed;
+  right: clamp(16px, 3vw, 26px);
+  /* Clear of the scroll meter, which is pinned to the same corner. */
+  bottom: clamp(70px, 9vh, 94px);
+  z-index: 60;
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: #7c5cff;
+  color: #fff;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 10px 30px -8px rgba(124, 92, 255, 0.7);
+  transition: transform var(--dur-micro) var(--ease-ui), box-shadow var(--dur-micro) var(--ease-ui);
+}
+.ml-chat-fab svg { width: 23px; height: 23px; }
+.ml-chat-fab:hover { transform: translateY(-2px); }
+.ml-chat-fab.is-open { background: rgba(28, 24, 52, 0.9); }
+
+.ml-chat-panel {
+  position: fixed;
+  right: clamp(16px, 3vw, 26px);
+  bottom: clamp(134px, 17vh, 160px);
+  z-index: 60;
+  width: min(370px, calc(100vw - 32px));
+  height: min(500px, calc(100vh - 220px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 20px;
+  background: rgba(16, 13, 34, 0.94);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 0 1px rgba(170, 150, 255, 0.28),
+    0 30px 70px -20px rgba(0, 0, 0, 0.9);
+}
+.ml-chat-panel[hidden] { display: none; }
+
+/* --- header --------------------------------------------------------- */
+.ml-chat-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+.ml-chat-badge {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  background: rgba(124, 92, 255, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(186, 166, 255, 0.5);
+  font-family: var(--font-head);
+  font-size: 15px;
+  font-weight: 500;
+  color: #d6c8ff;
+}
+.ml-chat-title {
+  display: block;
+  font-family: var(--font-chrome);
+  font-size: var(--text-body);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--white);
+}
+.ml-chat-sub {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-chrome);
+  font-size: var(--text-body-sm);
+  color: var(--fog);
+}
+
+/* --- messages ------------------------------------------------------- */
+.ml-chat-feed {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scrollbar-width: thin;
+}
+
+.ml-chat-msg {
+  max-width: 86%;
+  padding: 10px 13px;
+  border-radius: 14px;
+  font-family: var(--font-chrome);
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.ml-chat-msg.is-assistant {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--mist);
+  border-bottom-left-radius: 5px;
+}
+.ml-chat-msg.is-user {
+  align-self: flex-end;
+  background: #7c5cff;
+  color: #fff;
+  border-bottom-right-radius: 5px;
+}
+
+.ml-chat-typing {
+  align-self: flex-start;
+  display: flex;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+}
+.ml-chat-typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fog);
+  animation: ml-chat-bounce 1.3s infinite;
+}
+.ml-chat-typing span:nth-child(2) { animation-delay: 0.18s; }
+.ml-chat-typing span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes ml-chat-bounce {
+  0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
+/* --- input ---------------------------------------------------------- */
+.ml-chat-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+.ml-chat-input input {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 13px;
+  border-radius: var(--radius-card);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  font-family: var(--font-chrome);
+  /* 16px so iOS does not zoom the page when the field takes focus. */
+  font-size: 16px;
+  color: var(--white);
+}
+.ml-chat-input input::placeholder { color: rgba(255, 255, 255, 0.3); }
+.ml-chat-input input:focus {
+  outline: none;
+  border-color: rgba(167, 139, 250, 0.7);
+  box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.16);
+}
+.ml-chat-input button {
+  flex: none;
+  width: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-card);
+  background: #7c5cff;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity var(--dur-micro) var(--ease-ui);
+}
+.ml-chat-input button svg { width: 17px; height: 17px; }
+.ml-chat-input button:disabled { opacity: 0.4; cursor: default; }
+
+@media (max-width: 760px) {
+  .ml-chat-panel {
+    right: 12px;
+    left: 12px;
+    width: auto;
+    bottom: clamp(126px, 16vh, 150px);
+    height: min(440px, calc(100vh - 200px));
+  }
+  .ml-chat-fab { width: 50px; height: 50px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ml-chat-typing span { animation: none; }
+  .ml-chat-fab { transition: none; }
+}

@@ -1,0 +1,528 @@
+@import "./theme.css";
+
+/* ------------------------------------------------------------------
+   Full-bleed cinematic hero.
+
+   --px/--py (pointer, -1..1) and --sc (scroll, 0..1) are written once per
+   frame by Hero3D; every layer derives its own parallax from them, so depth
+   costs one rAF and no React re-renders.
+   ------------------------------------------------------------------ */
+
+/* The hero pins for the difference between this and the viewport — 90vh of
+   travel, which is what --sc is measured against. */
+.ml-hero-range {
+  position: relative;
+  height: 256vh;
+  /* Below the work section now — being covered is the transition. */
+  z-index: 0;
+}
+
+.ml-hero {
+  --px: 0;
+  --py: 0;
+  --sc: 0;
+  /* 0 until the reveal is done, then 0->1 as the whole hero exits right.
+     Everything that must leave together keys off this one value. */
+  --exit: clamp(0, calc((var(--sc) - 0.52) / 0.42), 1);
+  /* Both stage layers stay over-scaled so parallax can shift them without
+     ever exposing an edge. This is what makes full-bleed safe to move. */
+  --stage-zoom: 1.05;
+  /* How much the camera closes in across the hero's travel. */
+  --dolly: 0.95;
+  background: var(--void);
+  isolation: isolate;
+}
+
+/* --- 1. the render, edge to edge ---------------------------------- */
+.ml-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  /* The exit fade lives on the container, not on the two layers inside it.
+     ScrubSculpture sets an inline `opacity` on the still and the video to
+     crossfade between them, and an inline style beats a stylesheet rule — so
+     a fade written on the layers themselves was silently discarded and the
+     sculpture never faded at all. */
+  /* Hangs on through the first half of the exit, then goes quickly. Squaring
+     the other way (exit * exit) dropped it too early and left the uncovered
+     right of the frame empty while the panel was still crossing. */
+  opacity: calc(1 - var(--exit) * var(--exit) * var(--exit));
+}
+
+.ml-stage-still,
+.ml-stage-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Sculpture right of centre, clear of the headline.
+     Derived, not eyeballed: the hard object spans 0.307-0.724 of the master's
+     width, and the copy block ends at 504px on a >=1024px viewport. 26% put
+     the object's left edge at 479px on a 1440 frame — a 25px overlap. 12%
+     lands it at 589px, and still clears at 1280. Going lower buys more gap
+     but crops the podium's right edge, so this is the balance point. */
+  object-position: 12% 50%;
+  /* Camera move. Scale climbs with scroll so it reads as a dolly *into* the
+     scene rather than a pan across a picture, and the vertical drift rises
+     slightly as it closes in — the way a real camera booms up on approach.
+     The zoom floor stays above 1 so nothing can expose an edge. */
+  /* Camera dolly. The old +0.16 was a drift; this is a push. The sculpture
+     roughly doubles as you descend, so you travel *into* the object rather
+     than watching it recede — which is the move the reference is built
+     around. It keeps rotating throughout, so it never reads as a still being
+     enlarged. */
+  /* The pan is held back until the chips have all arrived. --exit is 0 for
+     the first 52% of the hero's travel, so the sculpture simply rotates in
+     place while the capabilities reveal around it; only then does it move.
+     Panning from the start meant the M had left before the last chip
+     appeared, stranding them on an empty field. */
+  transform:
+    scale(calc(var(--stage-zoom) + var(--exit) * var(--dolly)))
+    translate3d(
+      calc(var(--px) * -14px + var(--exit) * 20vw),
+      calc(var(--py) * -10px - var(--exit) * 40px),
+      0
+    );
+  transform-origin: 12% 50%;
+  transition: opacity 0.6s ease;
+  user-select: none;
+  -webkit-user-drag: none;
+  will-change: transform;
+}
+
+/* The clip carries its own black background, but at full bleed that is simply
+   the backdrop — no blend mode, no mask, nothing to hide. */
+.ml-stage-video {
+  pointer-events: none;
+}
+
+/* --- 2. scrim: contrast for the copy ------------------------------ */
+.ml-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    95deg,
+    rgba(0, 0, 0, 0.94) 0%,
+    rgba(0, 0, 0, 0.82) 22%,
+    rgba(0, 0, 0, 0.42) 44%,
+    rgba(0, 0, 0, 0) 66%
+  );
+  opacity: calc(1 - var(--sc) * 1.3);
+}
+
+/* --- 3. grade: violet lift + vignette ----------------------------- */
+.ml-grade {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(46% 52% at 62% 50%, rgba(122, 74, 255, 0.16) 0%, rgba(0, 0, 0, 0) 72%),
+    radial-gradient(120% 90% at 50% 50%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, 0.72) 100%);
+  transform: scale(calc(1 + var(--sc) * 0.04));
+  opacity: calc(1 - var(--exit));
+}
+
+/* --- 5. bubbles --------------------------------------------------- */
+.ml-bubbles {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  /* `screen` so only the rim light and specular survive — without it the
+     sprite body reads as a dark marble against the page. */
+  mix-blend-mode: screen;
+  transform: translate3d(
+    calc(var(--px) * -30px + var(--exit) * 30vw),
+    calc(var(--py) * -20px),
+    0
+  );
+  opacity: calc(1 - var(--exit) * 1.4);
+}
+
+/* --- 4. card layer ------------------------------------------------ */
+.ml-chips {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.ml-chip-slot {
+  position: absolute;
+  --shown: 0;
+  width: max-content;
+  transform:
+    translate3d(
+      calc(
+        var(--px) * -38px * var(--depth)
+        + (1 - var(--shown)) * 46px
+        + var(--exit) * 36vw
+      ),
+      calc(var(--py) * -24px * var(--depth) + (1 - var(--shown)) * 26px),
+      0
+    )
+    perspective(900px)
+    rotateY(var(--rot))
+    scale(calc(0.88 + var(--shown) * 0.12));
+  /* Fades on the way out as well as sliding. 36vw carries the right-hand
+     chips clear of the frame but not the centre ones, so travel alone left
+     two of them still sitting on an empty stage. */
+  opacity: calc(var(--shown) * (1 - var(--exit)));
+  will-change: transform, opacity;
+}
+
+/* --- capability chip ------------------------------------------------
+   A ghost container: hairline border, no fill, no shadow. Depth in this
+   system comes from translucency and what a panel obscures, never from
+   projected light — there is no light source in a void.
+   -------------------------------------------------------------------- */
+.ml-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: 12px var(--space-18);
+  white-space: nowrap;
+  border: 1px solid var(--ash);
+  border-radius: var(--radius-card);
+  background: var(--surface-overlay);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  font-family: var(--font-chrome);
+  color: var(--white);
+}
+
+.ml-chip-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border: 1px solid var(--smoke);
+  border-radius: var(--radius-ghost);
+  color: var(--mist);
+}
+.ml-chip-icon svg { width: 14px; height: 14px; }
+
+.ml-chip-title {
+  display: block;
+  font-size: var(--text-body);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+.ml-chip-sub {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-chrome);
+  font-size: var(--text-caption);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+
+/* --- portal ---------------------------------------------------------
+   A light burst out of the ring's centre, timed to the end of the M's turn.
+   Everything keys off --sc, so it is scroll-position driven and rewinds
+   cleanly when you scroll back up. --------------------------------------- */
+.ml-portal {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  /* Centred on the sculpture, not the viewport — the light has to look like
+     it is coming out of the ring. */
+  --cx: 62%;
+  --cy: 50%;
+  /* Ramps 0 -> 1 across the back half of the hero's travel. */
+  /* Blooms while the hero is still dissolving, so the two overlap and you
+     never see one end before the other begins. */
+  --burst: clamp(0, calc((var(--sc) - 0.38) / 0.32), 1);
+  /* Then clears, or it would hang as a white wash over the work section. */
+  --clear: clamp(0, calc((0.94 - var(--sc)) / 0.15), 1);
+  opacity: calc(var(--burst) * var(--clear));
+}
+
+/* Core flare */
+.ml-portal-core {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--cx) var(--cy),
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(196, 176, 255, 0.8) 6%,
+    rgba(124, 92, 255, 0.42) 16%,
+    rgba(60, 30, 150, 0.16) 32%,
+    rgba(0, 0, 0, 0) 58%
+  );
+  transform: scale(calc(0.25 + var(--burst) * 2.6));
+  transform-origin: var(--cx) var(--cy);
+}
+
+/* Expanding shock ring — the edge of the portal opening */
+.ml-portal-ring {
+  position: absolute;
+  left: var(--cx);
+  top: var(--cy);
+  width: 44vmax;
+  height: 44vmax;
+  margin: -22vmax 0 0 -22vmax;
+  border-radius: 50%;
+  border: 1.5px solid rgba(214, 200, 255, 0.75);
+  box-shadow:
+    0 0 40px rgba(150, 116, 255, 0.7),
+    inset 0 0 60px rgba(150, 116, 255, 0.35);
+  transform: scale(calc(0.06 + var(--burst) * 1.9));
+  /* Fades as it passes the viewer, so it reads as travelling through it. */
+  opacity: calc(1 - var(--burst) * var(--burst));
+}
+
+/* Streaks, for the sense of moving forward through the opening */
+.ml-portal-rays {
+  position: absolute;
+  inset: -20%;
+  background:
+    repeating-conic-gradient(
+      from 0deg at var(--cx) var(--cy),
+      rgba(255, 255, 255, 0) 0deg 5deg,
+      rgba(198, 180, 255, 0.16) 5deg 6deg,
+      rgba(255, 255, 255, 0) 6deg 12deg
+    );
+  mask-image: radial-gradient(circle at var(--cx) var(--cy), #000 4%, rgba(0,0,0,0.55) 22%, transparent 62%);
+  -webkit-mask-image: radial-gradient(circle at var(--cx) var(--cy), #000 4%, rgba(0,0,0,0.55) 22%, transparent 62%);
+  transform: scale(calc(0.4 + var(--burst) * 2.2)) rotate(calc(var(--burst) * 22deg));
+  transform-origin: var(--cx) var(--cy);
+  opacity: calc(var(--burst) * 0.7);
+}
+
+
+
+/* --- handover ---------------------------------------------------------
+   The two sections cross: the hero pans right and dissolves while the work
+   panel slides in from the left. Opposed directions, so neither is ever seen
+   through the other and there is no moment of empty stage between them.
+   --------------------------------------------------------------------- */
+
+/* --- hero copy: travels left and fades as you scroll ----------------
+   By the time the next section arrives the frame belongs to the sculpture
+   alone. Driven by --sc so it is scroll-position based, which means it
+   reverses cleanly on the way back up. --------------------------------- */
+.ml-copy {
+  transform: translate3d(calc(var(--sc) * -160px), 0, 0);
+  /* Gone by ~55% of the scroll distance, so it clears well before the
+     sculpture reaches its closest point. */
+  opacity: calc(1 - var(--sc) * 1.8);
+  will-change: transform, opacity;
+}
+
+.ml-scroll-cue {
+  opacity: calc(1 - var(--sc) * 3);
+  transform: translate3d(0, calc(var(--sc) * 24px), 0);
+}
+
+/* The scrim goes with it — without the copy there is nothing to protect,
+   and holding it would just dim the sculpture. */
+.ml-scrim {
+  opacity: calc(1 - var(--sc) * 1.3);
+}
+
+/* --- bottom fade --------------------------------------------------- */
+.ml-hero-fade {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 130px;
+  z-index: 8;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0,0,0,0), #000);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ml-bubbles, .ml-chip-slot { transform: none !important; }
+  .ml-chip-slot { opacity: 1 !important; }
+}
+
+/* Header goes with everything else. The hero is sticky rather than fixed, so
+   it would scroll away regardless — but holding it at full strength over an
+   emptying stage undercuts the exit. */
+.ml-hero-chrome {
+  opacity: calc(1 - var(--exit) * 1.6);
+}
+
+@media (max-width: 760px) {
+  .ml-portal { --cx: 52%; --cy: 40%; }
+
+  /* Pull the camera back.
+     object-fit: cover crops to the *element's* shape, so on a portrait phone
+     an ultrawide render gets sliced to a narrow strip of itself no matter
+     where object-position points — which is why the sculpture was either
+     missing or filling the whole screen with no way in between.
+     Instead the layer takes the render's own 5088:2160 ratio and is made
+     wider than the viewport, then offset so the sculpture sits centred. The
+     whole object is visible at a readable size and nothing is cropped. */
+  .ml-stage-still,
+  .ml-stage-video {
+    inset: auto auto auto 0;
+    top: 7%;
+    /* Tailwind's preflight sets img { max-width: 100% }, which silently
+       clamped this to the viewport width and left the sculpture off-screen
+       with no error anywhere. */
+    max-width: none;
+    /* --rig is how wide the render is drawn, as a share of the viewport, and
+       it is the only number that sets how close the camera feels. The offset
+       is derived from it rather than hand-tuned: the sculpture's centre sits
+       at 51.5% of the master frame, so this keeps it centred at any width.
+       Larger = closer. */
+    width: var(--rig);
+    left: calc(50% - 0.515 * var(--rig));
+    height: auto;
+    aspect-ratio: 5088 / 2160;
+    object-position: center;
+    transform-origin: 50% 50%;
+    /* The band has real top and bottom edges now, so they are dissolved into
+       the page rather than ruled across it. */
+    mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 80%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 80%, transparent 100%);
+  }
+
+  /* Barely any push. The dolly grows the render from its centre, so at 0.34
+     the box widened faster than the exit translated it — measured, the
+     sculpture's left edge drifted 24px *left* while the chips and copy went
+     141 and 156 right. It has to travel with them, not swell in place. */
+  .ml-hero { --dolly: 0.1; }
+
+  /* And a much longer rightward run, so the sculpture visibly leaves rather
+     than fading where it stands. */
+  .ml-stage-still,
+  .ml-stage-video {
+    transform:
+      scale(calc(var(--stage-zoom) + var(--exit) * var(--dolly)))
+      translate3d(
+        calc(var(--px) * -14px + var(--exit) * 62vw),
+        calc(var(--py) * -10px - var(--exit) * 20px),
+        0
+      );
+  }
+
+  /* Vertical rather than the desktop's left-to-right sweep — the copy sits
+     under the sculpture here, not beside it. */
+  .ml-scrim {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0.1) 22%,
+      rgba(0, 0, 0, 0.74) 52%,
+      rgba(0, 0, 0, 0.94) 100%
+    );
+  }
+
+  /* --- three-phase hero, phones only ----------------------------------
+     Desktop shows the sculpture and the copy side by side because there are
+     two columns to put them in. On one narrow column they compete, which is
+     what made it feel crammed. So they take turns:
+
+       0.00 - 0.46   sculpture alone, chips arriving around it
+       0.50 - 0.68   sculpture and chips leave together
+       0.66 - 0.88   copy fades up into the empty frame
+       0.88 - 0.96   copy leaves, and the pricing panel wipes in
+
+     The range grows to 330vh to buy runway for three phases instead of one;
+     the Proposition's overlap is retimed to match in proposition.css. */
+  .ml-hero-range { height: 280vh; }
+
+  /* One number for how close the sculpture reads. 240% filled the frame edge
+     to edge and clipped the ring; 200% keeps the whole object — ring, podium
+     and all — while still holding the screen. Below about 140% the chips
+     start floating in empty space beneath it. */
+  .ml-hero { --rig: 200%; }
+
+  .ml-hero {
+    /* One exit for everything. The sculpture, the chips and the copy all
+       travel right and fade on the same curve, so the hero leaves as a single
+       composition rather than in pieces. Runs long — a third of the hero's
+       travel — because a group move reads as rushed if it is quick. */
+    --exit: clamp(0, calc((var(--sc) - 0.46) / 0.34), 1);
+  }
+
+  .ml-copy {
+    /* Anchored to the bottom of the frame, directly under the sculpture and
+       its chips. */
+    justify-content: flex-end;
+    padding-bottom: 9vh;
+    /* Rightward, on --exit, with the sculpture and the chips. Travels less
+       far than they do — 40vw against their 20 and 36 — because it starts
+       from the left gutter rather than the middle of the frame, and it is
+       gone by the time that difference would show. */
+    opacity: calc(1 - var(--exit) * 1.35);
+    transform: translate3d(calc(var(--exit) * 40vw), 0, 0);
+  }
+
+  /* Leaves with what it was protecting. */
+  .ml-scrim { opacity: calc((1 - var(--exit) * 1.2) * 0.92); }
+
+  /* The headline can afford to be a touch smaller now it shares the screen
+     with the sculpture and five chips. */
+  .ml-copy h1 { font-size: clamp(1.9rem, 9vw, 2.6rem); }
+
+  /* Chips stay floating, as on desktop — only their coordinates change.
+     The stored positions are percentages of a 1440 frame, so four of five
+     ran off a 390px screen; Client Portal by 190px. Right-anchoring the ones
+     on that side makes overflow impossible whatever the chip's width.
+     !important because the component writes left/top inline. */
+  /* Gathered around the sculpture rather than trailing off below it. With
+     --rig at 200% the render occupies roughly y 60-425 on a 390x844 phone,
+     and the old 46/53/61% put three of the five in the empty space under the
+     podium. These sit inside that band. Left and right alternate, so
+     vertically adjacent chips never collide horizontally.
+     3 was at 8%, which is y=67 — behind a nav that ends at 84. */
+  .ml-chip-slot { --depth: 0.5; }
+  .ml-chip-slot:nth-child(3) { left: 5% !important;  top: 10% !important; }
+  .ml-chip-slot:nth-child(2) { left: auto !important; right: 5%; top: 16.5% !important; }
+  .ml-chip-slot:nth-child(1) { left: 5% !important;  top: 34% !important; }
+  .ml-chip-slot:nth-child(4) { left: auto !important; right: 5%; top: 41% !important; }
+  .ml-chip-slot:nth-child(5) { left: 5% !important;  top: 48.5% !important; }
+
+  .ml-chip {
+    padding: 9px 13px;
+    gap: 9px;
+  }
+  .ml-chip-icon { width: 22px; height: 22px; }
+  .ml-chip-icon svg { width: 12px; height: 12px; }
+  .ml-chip-title { font-size: 12px; }
+}
+
+/* --- short phones ------------------------------------------------------
+   A 375x667 screen has to hold the same nav, sculpture, five chips and copy
+   block as an 844px one. Measured before writing this: the headline started
+   at 352 while the lowest chip still ran to 392, and the top chip sat under
+   the nav. The sculpture gives up some size, the chips gather tighter, and
+   the copy sets a little smaller. Height-based, so a tall phone keeps the
+   larger treatment. ---------------------------------------------------- */
+@media (max-width: 760px) and (max-height: 720px) {
+  .ml-hero { --rig: 165%; }
+
+  .ml-stage-still,
+  .ml-stage-video { top: 9%; }
+
+  .ml-chip-slot:nth-child(3) { top: 13.5% !important; }
+  .ml-chip-slot:nth-child(2) { top: 20.5% !important; }
+  .ml-chip-slot:nth-child(1) { top: 28% !important; }
+  .ml-chip-slot:nth-child(4) { top: 35% !important; }
+  .ml-chip-slot:nth-child(5) { top: 42% !important; }
+
+  .ml-chip { padding: 7px 11px; }
+  .ml-chip-icon { width: 20px; height: 20px; }
+
+  /* 5vh left the CTA's lower edge 6px into the scroll cue. */
+  .ml-copy { padding-bottom: 9vh; }
+  .ml-copy h1 { font-size: 1.7rem; }
+  .ml-copy p { font-size: 15px; }
+  .ml-copy .ml-pill { padding: 12px 20px; }
+}
