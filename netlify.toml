@@ -1,0 +1,23 @@
+# Netlify build settings for the motionlee.co.uk site.
+#
+# This app is NOT a static export — app/api/enquiry is a runtime Node route and
+# app/opengraph-image renders on demand — so it needs Netlify's Next.js
+# runtime, which is applied automatically for Next projects. Do not add
+# `output: "export"` to next.config.ts; it would drop the enquiry endpoint and
+# the form would 404 on submit.
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Required environment variables, set in the Netlify UI rather than here so no
+# secret lands in the repo:
+#   NEXT_PUBLIC_SUPABASE_URL
+#   NEXT_PUBLIC_SUPABASE_ANON_KEY   (anon key only — never service_role)
+#   RESEND_API_KEY
+#   RESEND_FROM                     (an address, e.g. grow@motionlee.ai)
+#   ANTHROPIC_API_KEY               (the site assistant — already set on the
+#                                    old site, since its chat function used it)
