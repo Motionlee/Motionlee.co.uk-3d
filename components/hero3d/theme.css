@@ -173,8 +173,10 @@
   }
 
   /* The footer's small print carries the concept-work disclaimer, which is a
-     statement worth being able to read rather than boilerplate. */
+     statement worth being able to read rather than boilerplate. Same for the
+     flag on a case study page. */
   .ml-footer-base { font-size: 12px; }
+  .ml-case-flag { font-size: 13px; }
 
   /* Touch targets. Apple asks for 44pt; these were inline links between 20
      and 36px tall, which is a miss-and-try-again on a moving bus. Padding
@@ -190,7 +192,13 @@
   .ml-work-all,
   .ml-sec-note a,
   .ml-contact-facts a,
-  .ml-footer-col a {
+  .ml-footer-col a,
+  /* Added after the footer's legal row and the case study's closing email
+     link came in at 21 and 17px — the same miss as the first pass, in new
+     markup written after that rule existed. */
+  .ml-footer-legal a,
+  .ml-case-cta-mail a,
+  .ml-case-more a {
     display: inline-flex;
     align-items: center;
     min-height: 44px;

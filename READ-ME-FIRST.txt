@@ -1,0 +1,60 @@
+UPDATE FOR Motionlee.co.uk-3d
+=============================
+
+12 files. The folder structure already matches the repo, so you can drag the
+contents straight in and let it overwrite.
+
+WHAT EACH ONE DOES
+------------------
+app/api/chat/route.ts     Fixes the assistant. Trims the API key (a value
+                          pasted into a dashboard usually picks up a trailing
+                          newline, which returns a 401 that looks exactly like
+                          a wrong key), and adds a `ref` field carrying the
+                          upstream status so the cause can be read with one
+                          curl instead of hunting the Netlify log.
+
+netlify.toml              301 redirects for /work/elan-studio and
+                          /work/haven-hart, which are 404ing right now. They
+                          were live URLs on the previous site.
+
+app/not-found.tsx         The 404 page was still the old lime-green design.
+components/hero3d/case.css  Styles for that page.
+
+app/layout.tsx            The skip link was a lime pill on a violet site.
+app/work/page.tsx         The work index was still the old design.
+components/hero3d/theme.css  Tap-target and text-size fixes for phones.
+
+AGENTS.md                 Project guidance: the Portal safety boundaries, what
+CLAUDE.md                 the business does not sell, the measurement traps,
+                          and the architecture that bites silently. Read by
+                          Codex and other agents. CLAUDE.md just points at it.
+
+.gitignore                Keeps build output and .env.local out of the repo.
+                          IMPORTANT — the repo currently has no .gitignore, so
+                          without this a future upload could include your
+                          .env.local and put live keys on GitHub.
+
+.env.local.example        Empty template showing which variables are needed.
+.claude/launch.json       Dev server config. Harmless.
+
+
+AFTER UPLOADING
+---------------
+Netlify rebuilds automatically. Then run this and send me the number after
+"ref":
+
+  curl -s -X POST https://motionlee.co.uk/api/chat \
+    -H 'Content-Type: application/json' \
+    -d '{"messages":[{"role":"user","content":"hi"}]}'
+
+  ref 0    the key is not set on this deploy
+  ref 401  key is wrong, expired, or had whitespace (the trim may have fixed it)
+  ref 404  model name not recognised
+  ref 429  rate limited
+
+NOT INCLUDED
+------------
+archive/ — the old motionlee.co.uk saved before it was replaced. It is the
+only copy of the legal text and case-study content in their original form.
+It lives in /Users/ronn/Motionlee.co.uk/archive/. Worth keeping somewhere,
+but nothing on the live site depends on it.

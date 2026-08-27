@@ -63,7 +63,11 @@ Once per conversation only.
 }
 
 export async function POST(request: Request) {
-  const fallback = (reply: string) => NextResponse.json({ reply });
+  // `ref` carries the upstream HTTP status on a failure so the cause can be
+  // read with one curl instead of hunting through a dashboard's log stream.
+  // A status code is not sensitive, and the widget ignores the field.
+  const fallback = (reply: string, ref?: number) =>
+    NextResponse.json(ref === undefined ? { reply } : { reply, ref });
 
   // Validate the request before anything else. Checking the key first meant a
   // malformed body came back as a friendly chat message with a 200, hiding a
@@ -98,11 +102,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const key = process.env.ANTHROPIC_API_KEY;
+  // Trimmed: a value pasted into a dashboard field very often carries a
+  // trailing newline or space, which makes the header invalid and comes back
+  // as a 401 that looks exactly like a wrong key.
+  const key = process.env.ANTHROPIC_API_KEY?.trim();
   if (!key) {
     console.error("[chat] ANTHROPIC_API_KEY is not set");
     return fallback(
       `I can't reach my brain right now — email ${site.email} and one of us will pick it up.`,
+      0, // 0 = the key is not set at all
     );
   }
 
@@ -123,8 +131,14 @@ export async function POST(request: Request) {
     });
 
     if (!res.ok) {
-      console.error("[chat] Anthropic error", res.status, (await res.text()).slice(0, 300));
-      return fallback(`Sorry — I'm having trouble right now. Email ${site.email} and we'll help straight away.`);
+      console.error(
+        `[chat] Anthropic rejected the call — status ${res.status}. 401 = bad or expired key, 404 = unknown model, 400 = malformed request. Body:`,
+        (await res.text()).slice(0, 300),
+      );
+      return fallback(
+        `Sorry — I'm having trouble right now. Email ${site.email} and we'll help straight away.`,
+        res.status,
+      );
     }
 
     const data = (await res.json()) as { content?: { text?: string }[] };
@@ -136,6 +150,6 @@ export async function POST(request: Request) {
     );
   } catch (err) {
     console.error("[chat] request failed", err);
-    return fallback(`Sorry, something went wrong. Email ${site.email} and we'll pick it up.`);
+    return fallback(`Sorry, something went wrong. Email ${site.email} and we'll pick it up.`, -1);
   }
 }

@@ -1,74 +1,88 @@
 import type { Metadata } from "next";
-import { Nav } from "@/components/Nav";
-import { Footer } from "@/components/Footer";
-import { Reveal } from "@/components/Reveal";
-import { WorkCard } from "@/components/WorkCard";
+import Image from "next/image";
+import Link from "next/link";
+import { Nav3D } from "@/components/hero3d/Nav3D";
+import { Footer3D } from "@/components/hero3d/Footer3D";
 import { projects } from "@/lib/projects";
+import "@/components/hero3d/case.css";
 
 export const metadata: Metadata = {
-  title: "Our Work",
+  title: "Selected work",
   description:
     "Six brands designed and built end to end by Motionlee — identity, website, product visuals and motion content. Self-initiated studio concept work.",
   alternates: { canonical: "/work" },
 };
 
-export default function WorkPage() {
+export default function WorkIndex() {
   return (
     <>
-      <Nav />
-      <main id="main">
-        <section className="relative overflow-hidden border-b border-white/8 pt-[132px] pb-20 sm:pt-[168px] sm:pb-24">
-          <div className="grid-bg absolute inset-0 -z-10 opacity-50" />
-          <div className="absolute -left-32 top-0 -z-10 h-[420px] w-[420px] rounded-full bg-indigo/22 blur-[130px]" />
+      <Nav3D />
 
-          <div className="mx-auto max-w-[1240px] px-5 sm:px-8">
-            <Reveal>
-              <p className="eyebrow flex items-center gap-3 text-indigo-2">
-                <span className="h-px w-8 bg-indigo-2" />
-                Selected work
-              </p>
-            </Reveal>
-            <Reveal delay={0.06}>
-              <h1 className="display mt-6 max-w-4xl text-[clamp(2.5rem,8vw,5.5rem)]">
-                Six brands, built
-                <span className="block text-lime">from nothing.</span>
-              </h1>
-            </Reveal>
-            <Reveal delay={0.12}>
-              <p className="mt-8 max-w-2xl text-[17px] leading-relaxed text-white/60 sm:text-lg">
-                Every project below is self-initiated studio work — a brand we
-                invented, designed and produced ourselves, from the wordmark to
-                the website to the photography. Two of them, Élan and Apex, now
-                have real product ranges behind them.
-              </p>
-            </Reveal>
-            <Reveal delay={0.18}>
-              <p className="mt-6 max-w-2xl rounded-xl border border-white/10 bg-white/[0.03] p-5 text-[15px] leading-relaxed text-white/50">
-                <strong className="font-semibold text-white/75">
-                  Why concept work?
-                </strong>{" "}
-                We would rather show you what we do when nobody is limiting the
-                brief than show you a watered-down version of someone
-                else&rsquo;s. Client projects are covered by NDA or in progress
-                — ask and we&rsquo;ll walk you through them privately.
-              </p>
-            </Reveal>
-          </div>
-        </section>
+      <main id="main" className="ml-case ml-index">
+        <div className="ml-case-inner">
+          <p className="ml-sec-eyebrow">
+            <span />
+            Selected work
+          </p>
 
-        <section className="py-20 sm:py-24">
-          <div className="mx-auto max-w-[1240px] px-5 sm:px-8">
-            <div className="grid gap-6 md:grid-cols-2">
-              {projects.map((project, i) => (
-                <Reveal key={project.slug} delay={(i % 2) * 0.08}>
-                  <WorkCard project={project} priority={i < 2} />
-                </Reveal>
-              ))}
-            </div>
+          <h1 className="ml-index-title">
+            Six brands, built
+            <span>from nothing.</span>
+          </h1>
+
+          <p className="ml-prose ml-index-lede">
+            Every project below is self-initiated studio work — a brand we invented,
+            designed and produced ourselves, from the wordmark to the website to the
+            photography. Two of them, Élan and Apex, now have real product ranges
+            behind them.
+          </p>
+
+          <p className="ml-index-note">
+            <strong>Why concept work?</strong> We would rather show you what we do when
+            nobody is limiting the brief than a watered-down version of someone else&rsquo;s.
+            Client projects are under NDA or in progress — ask and we&rsquo;ll walk you
+            through them privately.
+          </p>
+
+          <div className="ml-index-grid">
+            {projects.map((p, i) => (
+              <Link key={p.slug} href={`/work/${p.slug}`} className="ml-index-card">
+                <span className="ml-index-shot">
+                  <Image
+                    src={p.image}
+                    alt=""
+                    fill
+                    sizes="(max-width: 760px) 92vw, (max-width: 1180px) 46vw, 380px"
+                    /* The first row is above the fold on most screens. */
+                    priority={i < 2}
+                  />
+                </span>
+                <span className="ml-index-body">
+                  <span className="ml-case-more-sector">{p.sector}</span>
+                  <span className="ml-index-name">{p.name}</span>
+                  <span className="ml-index-strap">{p.strapline}</span>
+                  <span className="ml-index-meta">
+                    {p.timeline} · {p.disciplines.length} disciplines
+                  </span>
+                </span>
+              </Link>
+            ))}
           </div>
-        </section>
+
+          <aside className="ml-case-cta ml-index-cta">
+            <h2>
+              Like what you see?
+              <span>Let&rsquo;s build yours next.</span>
+            </h2>
+            <a href="/#contact" className="ml-pill">
+              Get a quote
+              <span aria-hidden="true">↗</span>
+            </a>
+          </aside>
+        </div>
       </main>
-      <Footer />
+
+      <Footer3D />
     </>
   );
 }

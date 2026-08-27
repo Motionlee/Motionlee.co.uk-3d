@@ -21,3 +21,19 @@
 #   RESEND_FROM                     (an address, e.g. grow@motionlee.ai)
 #   ANTHROPIC_API_KEY               (the site assistant — already set on the
 #                                    old site, since its chat function used it)
+
+# The previous site's case-study URLs. Four of the six already match this
+# site's slugs; these two do not, and were live long enough to be linked or
+# indexed. 301 so any ranking they hold moves across rather than dying in a
+# 404.
+[[redirects]]
+  from = "/work/elan-studio"
+  to = "/work/elan"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/work/haven-hart"
+  to = "/work/haven-and-hart"
+  status = 301
+  force = true

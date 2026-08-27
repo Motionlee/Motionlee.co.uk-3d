@@ -1,38 +1,43 @@
 import Link from "next/link";
-import { Nav } from "@/components/Nav";
-import { Footer } from "@/components/Footer";
+import { Nav3D } from "@/components/hero3d/Nav3D";
+import { Footer3D } from "@/components/hero3d/Footer3D";
+import "@/components/hero3d/case.css";
 
 export default function NotFound() {
   return (
     <>
-      <Nav />
-      <main id="main" className="grid min-h-[70vh] place-items-center px-5 pt-[72px]">
-        <div className="text-center">
-          <p className="display text-[clamp(4rem,18vw,10rem)] text-lime">404</p>
-          <h1 className="display mt-4 text-3xl sm:text-4xl">
-            That page doesn&rsquo;t exist.
-          </h1>
-          <p className="mx-auto mt-5 max-w-md text-white/55">
-            It may have moved, or the link might be wrong. Here are two places
-            worth going instead.
+      <Nav3D />
+
+      <main id="main" className="ml-case ml-404">
+        <div className="ml-case-inner">
+          <p className="ml-sec-eyebrow">
+            <span />
+            404
           </p>
-          <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link
-              href="/"
-              className="rounded-full bg-lime px-7 py-3.5 font-semibold text-ink"
-            >
+
+          <h1 className="ml-index-title">
+            That page
+            <span>doesn&rsquo;t exist.</span>
+          </h1>
+
+          <p className="ml-prose ml-index-lede">
+            It may have moved, or the link might be wrong. Two places worth going
+            instead.
+          </p>
+
+          <div className="ml-404-actions">
+            <Link href="/" className="ml-pill">
               Back home
+              <span aria-hidden="true">↗</span>
             </Link>
-            <Link
-              href="/work"
-              className="rounded-full border border-white/18 px-7 py-3.5 font-semibold hover:bg-white/5"
-            >
+            <Link href="/work" className="ml-ghost">
               See our work
             </Link>
           </div>
         </div>
       </main>
-      <Footer />
+
+      <Footer3D />
     </>
   );
 }
